@@ -10,7 +10,7 @@ export default {
                 primary: "#8c2bee",
                 "primary-hover": "#7a25d1",
                 "primary-dark": "#6b21c4",
-                background: "#f7f6f8",
+                background: "#F7F6F8",
                 "background-dark": "#191022",
                 surface: "#ffffff",
                 "surface-dark": "#f9fafb",
@@ -19,7 +19,7 @@ export default {
                 "border-light": "#e9e4f0",
             },
             backgroundImage: {
-                "brand-gradient": "linear-gradient(to right, #ff00ff, #a900d2)",
+                "brand-gradient": "linear-gradient(to right, #FF00FF, #a400cd)",
             },
             animation: {
                 scroll:
@@ -37,6 +37,7 @@ export default {
                 numeric: ['Zen Dots', 'sans-serif'],
                 body: ['Product Sans', 'sans-serif'],
                 sub: ['Inter', 'sans-serif'],
+                restore: ['Restore', 'sans-serif'],
             },
             gridTemplateColumns: {
                 custom: 'repeat(12, minmax(0, 1fr))',
