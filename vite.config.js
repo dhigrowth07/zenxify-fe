@@ -13,7 +13,8 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     server: {
-      port: Number(env.VITE_PORT) || 5173,
+      port: parseInt(env.VITE_PORT) || 5173,
+      historyApiFallback: true,
     },
     resolve: {
       alias: {
@@ -22,6 +23,16 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       "process.env.NODE_ENV": JSON.stringify(mode),
+    },
+    build: {
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          // Remove console logs in production
+          drop_console: true,
+          drop_debugger: true,
+        },
+      },
     },
   };
 });

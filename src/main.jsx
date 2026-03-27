@@ -1,19 +1,32 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './redux/store';
 import { ThemeProvider } from './context/ThemeContext'
 import './index.css'
 import App from './App.jsx'
+import { BrowserRouter } from 'react-router-dom';
+
+const FullScreenLoader = () => (
+  <div className='flex justify-center items-center h-screen'>
+    <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-900'></div>
+  </div>
+);
 
 const rootElement = document.getElementById('root')
 if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
       <BrowserRouter>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
+        <Provider store={store}>
+          <PersistGate loading={<FullScreenLoader />} persistor={persistor}>
+            <ThemeProvider>
+              <App />
+            </ThemeProvider>
+          </PersistGate>
+        </Provider>
       </BrowserRouter>
-    </StrictMode>,
+    </StrictMode>
   )
 }
