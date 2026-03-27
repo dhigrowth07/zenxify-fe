@@ -1,0 +1,1646 @@
+@baseUrl = http://localhost:3000
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZmYzI0YmQwLWVjMGMtNGJlOC1hNWM0LTI5ZTBlYjIzZjY2MiIsImVtYWlsIjoibWF0aGFubWl0aHVuODgzOEBnbWFpbC5jb20iLCJwbGFuIjoiZW50ZXJwcmlzZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc0MTA0NjY4LCJleHAiOjE3NzQxMDU1Njh9.dMXnlmCDCwYCKq-Z15cTyghHwjiOooOPzFGYuZMOdDM
+@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZmYzI0YmQwLWVjMGMtNGJlOC1hNWM0LTI5ZTBlYjIzZjY2MiIsImVtYWlsIjoibWF0aGFubWl0aHVuODgzOEBnbWFpbC5jb20iLCJwbGFuIjoiZW50ZXJwcmlzZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc0MTA0NjY4LCJleHAiOjE3NzQ3MDk0Njh9.fRVTP3w_bC9CLubUApY2bgFS_pOzish-U3hs4IqRReE
+
+@email = mathanmithun8838@gmail.com
+@password = Mathan@1999
+
+# @authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJjMDFjMzNmLTY4ZjAtNDRmNS1hNjUyLTM0MmI0NDc3NzE0NiIsImVtYWlsIjoiYWRtaW5AemVueGlmeS5jb20iLCJwbGFuIjoiZnJlZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3NDA5NDg3MSwiZXhwIjoxNzc0MDk1NzcxfQ.qB6Eh9KBsWijahGsCZYhdBU5UnODfm9UKsKiSs8o4BA
+# @refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJjMDFjMzNmLTY4ZjAtNDRmNS1hNjUyLTM0MmI0NDc3NzE0NiIsImVtYWlsIjoiYWRtaW5AemVueGlmeS5jb20iLCJwbGFuIjoiZnJlZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3NDA5NDg3MSwiZXhwIjoxNzc0Njk5NjcxfQ._t92R9RiuUds3eGKTb7IFq6-UrT1ukTi5gA8MwHcIGc
+
+# @email = admin@zenxify.com
+# @password = Admin@123
+
+
+
+### LOGIN A USER
+# @Module: AUTH APIS
+# @Description: Authenticates a user and returns access/refresh tokens.
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}"
+}
+
+### =========================================================================
+### SYSTEM APIS
+### =========================================================================
+
+### ENTRY POINT
+# @Module: SYSTEM APIS
+# @Description: Returns a welcome message to verify the API is running correctly.
+GET {{baseUrl}}/
+
+# STATUS CODE 200
+# RESPONSE BODY
+# <h1>ZENXIFY API IS RUNNING</h1>
+
+### HEALTH CHECK
+# @Module: SYSTEM APIS
+# @Description: Checks the service health status, environment, and server timestamp.
+GET {{baseUrl}}/health
+
+# STATUS CODE 200
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Service is healthy",
+#   "data": {
+#     "status": "ok",
+#     "service": "zenxify-be",
+#     "env": "production"
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:32:49.322Z",
+#   "request_id": "7ce2de9e-735e-4ed1-b01a-5faa9205ac42"
+# }
+
+
+### NOT FOUND
+# @Module: SYSTEM APIS
+# @Description: Returns a 404 error response for an invalid route.
+GET {{baseUrl}}/not-found
+
+# STATUS CODE 404
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 404,
+#   "message": "Not Found - /not-found",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "NOT_FOUND",
+#       "message": "Not Found - /not-found",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:34:50.900Z",
+#   "request_id": "34870197-58f7-41fe-ba18-a65ad978b564"
+# }
+
+
+### =========================================================================
+### AUTH APIS
+### =========================================================================
+
+### REGISTER A USER
+# @Module: AUTH APIS
+# @Description: Creates a new user account and sends a verification email.
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+    "full_name": "MaThanMiThun",
+    "email": "{{email}}",
+    "password": "{{password}}",
+    "tos_accepted": true
+}
+
+# STATUS CODE 200
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Registration successful. Please verify your email to log in.",
+#   "data": {
+#     "userId": "ca0be2f0-95e0-46fc-a7de-188975b43cc6"
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "b01d379e-36d4-4cb8-aea4-3f00b83fe920"
+# }
+
+# STATUS CODE 409
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 409,
+#   "message": "An account with this email already exists.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "EMAIL_TAKEN",
+#       "message": "An account with this email already exists.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "b01d379e-36d4-4cb8-aea4-3f00b83fe920"
+# }
+
+# STATUS CODE 400
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Unexpected non-whitespace character after JSON at position 146",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "INTERNAL_SERVER_ERROR",
+#       "message": "Unexpected non-whitespace character after JSON at position 146",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "87052742-9350-442a-b395-3bad92253af2"
+# }
+
+# STATUS CODE 400 (Weak Password)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Password must be at least 8 characters",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Password must be at least 8 characters",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "e22a7799-8099-4e3d-a86c-b3766b36c755"
+# }
+
+# STATUS CODE 400 (TOS Not Accepted)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "You must accept the Terms of Service to register",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "You must accept the Terms of Service to register",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "8d5787a7-1dcf-493f-9ffd-977796f1b209"
+# }
+
+# STATUS CODE 400 (Name Too Short)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Full name must be at least 2 characters",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Full name must be at least 2 characters",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "58833098-f8cb-44c5-b50a-a6f969232204"
+# }
+
+# STATUS CODE 400 (Invalid Email)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Must be a valid email address",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Must be a valid email address",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "ae303023-cf8e-49c4-926f-451f222d80e5"
+# }
+
+### VERIFY EMAIL
+# @Module: AUTH APIS
+# @Description: Verifies a user's email address using a token sent during registration.
+GET {{baseUrl}}/api/auth/verify-email?token=1416b754b6479851104b602aba1aa42bfc5e4e68600f65ac408874769434cf46
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Email verified successfully",
+#   "data": {
+#     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "eb99e51c6924..."
+# }
+
+# STATUS CODE 400 (Invalid Token)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Invalid or expired verification link.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "INVALID_TOKEN",
+#       "message": "Invalid or expired verification link.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "b3bd866f-bbb0-4241-85cf-79c9738236e8"
+# }
+
+# STATUS CODE 409 (Already Verified)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 409,
+#   "message": "This email is already verified. Please log in.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "ALREADY_VERIFIED",
+#       "message": "This email is already verified. Please log in.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "1dd981cc-8c61-46c9-a050-f4ecb2d8fdba"
+# }
+
+# STATUS CODE 400 (Token Expired)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Verification link expired. A new one has been sent to your email.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "TOKEN_EXPIRED",
+#       "message": "Verification link expired. A new one has been sent to your email.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "19b3f790-3e0e-4e23-b65d-e3718a4a94bc"
+# }
+
+### LOGIN A USER
+# @Module: AUTH APIS
+# @Description: Authenticates a user and returns access/refresh tokens.
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}"
+}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Login successful",
+#   "data": {
+#     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#     "user": {
+#       "id": "6fc24bd0-ec0c-4be8-a5c4-29e0eb23f662",
+#       "email": "mathanmithun8838@gmail.com",
+#       "full_name": "MaThanMiThun",
+#       "plan": "free",
+#       "role": "user"
+#     }
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "454037ed-2af2-4f25-b9ab-ede7f84beb3b"
+# }
+
+# STATUS CODE 401 (Invalid Credentials)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 401,
+#   "message": "Invalid email or password",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "INVALID_CREDENTIALS",
+#       "message": "Invalid email or password",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "454037ed-2af2-4f25-b9ab-ede7f84beb3b"
+# }
+
+# STATUS CODE 403 (Email Not Verified)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 403,
+#   "message": "Please verify your email address before logging in.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "EMAIL_NOT_VERIFIED",
+#       "message": "Please verify your email address before logging in.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "73008cbd-9dc9-4d87-b74d-bd082c3e08fb"
+# }
+
+### RESEND VERIFY EMAIL
+# @Module: AUTH APIS
+# @Description: Resends the email verification link to the user's email address.
+POST {{baseUrl}}/api/auth/resend-verification
+Content-Type: application/json
+
+{
+    "email": "{{email}}"
+}
+
+# STATUS CODE 200 (Success - Account found and unverified)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "If that email exists and is unverified, a new link has been sent.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "672cf265-efef-4815-99e5-09735af55abb"
+# }
+
+# STATUS CODE 409 (Already Verified)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 409,
+#   "message": "This email address is already verified.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "ALREADY_VERIFIED",
+#       "message": "This email address is already verified.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "672cf265-efef-4815-99e5-09735af55abb"
+# }
+
+# STATUS CODE 429 (Resend Cooldown - Sent too recently)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 429,
+#   "message": "Please wait before requesting another verification email.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "RESEND_COOLDOWN",
+#       "message": "Please wait before requesting another verification email.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "2a74723c-2e70-407b-b47b-028429f61fc8"
+# }
+
+# STATUS CODE 404 (Email Not Found)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 404,
+#   "message": "No account found with this email address.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "EMAIL_NOT_FOUND",
+#       "message": "No account found with this email address.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "80100572-abf2-485e-b208-4d9fac64e19b"
+# }
+
+### REFRESH TOKEN
+# @Module: AUTH APIS
+# @Description: Exchanges a valid refresh token for a new access token and refresh token.
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "{{refreshToken}}"
+}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Token refreshed",
+#   "data": {
+#     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "adcae4b5-2a99..."
+# }
+
+# STATUS CODE 401 (Session Expired / Token Reuse)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 401,
+#   "message": "Session not found or has expired",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "SESSION_EXPIRED",
+#       "message": "Session not found or has expired",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "adcae4b5-2a99-408b-b1ce-6f87141827c2"
+# }
+
+# STATUS CODE 401 (Invalid Token Format)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 401,
+#   "message": "Invalid or expired refresh token",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "INVALID_REFRESH_TOKEN",
+#       "message": "Invalid or expired refresh token",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "029b1492-0c0d-49a7-8e42-950c181abd9b"
+# }
+
+# STATUS CODE 400 (Missing Token)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Refresh token is required",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Refresh token is required",
+#       "details": {
+#         "errors": [
+#           { "field": "refreshToken", "message": "Refresh token is required" }
+#         ]
+#       }
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "bbd928bc-d97e-4cb1-9991-2a38fd236fb0"
+# }
+
+### LOGOUT A USER
+# @Module: AUTH APIS
+# @Description: Invalidates the user's current session and refresh token.
+POST {{baseUrl}}/api/auth/logout
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "refreshToken": "{{refreshToken}}"
+}
+
+# STATUS CODE 200 (Success - Tokens invalidated and cookies cleared)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Logged out successfully",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "5c219b80..."
+# }
+
+# STATUS CODE 200 (Idempotent - Already logged out or missing refresh token)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Logged out successfully",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "5c219b80..."
+# }
+
+# STATUS CODE 401 (Unauthorized - Bearer token missing or invalid)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 401,
+#   "message": "Authentication token missing",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "UNAUTHORIZED",
+#       "message": "Authentication token missing",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "5c219b80-fbae-4368-911e-11f7a710c6d7"
+# }
+
+### FORGOT PASSWORD
+# @Module: AUTH APIS
+# @Description: Initiates the password reset process by sending a reset link to the user's email.
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+    "email": "{{email}}"
+}
+
+# STATUS CODE 200 (Success - If account exists)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "If that email is registered, a reset link has been sent.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "6c556f35..."
+# }
+
+# STATUS CODE 404 (Email Not Found)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 404,
+#   "message": "No account found with this email address.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "EMAIL_NOT_FOUND",
+#       "message": "No account found with this email address.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "6c556f35-8611-4441-8e88-d70173a89061"
+# }
+
+# STATUS CODE 429 (Reset Cooldown - Requested too recently)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 429,
+#   "message": "Please wait before requesting another password reset email.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "RESET_COOLDOWN",
+#       "message": "Please wait before requesting another password reset email.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "bc291c51-83d4-49cd-9db2-80d8edc7e55f"
+# }
+
+# STATUS CODE 400 (Validation Error - Invalid Email)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Must be a valid email address",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Must be a valid email address",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "a7eb4034-2fd6-4c6c-9faa-9f743dd0133a"
+# }
+
+### RESET PASSWORD
+# @Module: AUTH APIS
+# @Description: Resets the user's password using a valid reset token.
+POST {{baseUrl}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+    "token": "e88872734924e51bfe2d33335799b93cee3fb647e36a5b6305063b636dd41420",
+    "new_password": "NewTestPass@123"
+}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Password reset successfully. Please log in with your new password.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "e8887273..."
+# }
+
+# STATUS CODE 400 (Invalid or Expired Token)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Invalid or expired password reset link.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "INVALID_RESET_TOKEN",
+#       "message": "Invalid or expired password reset link.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "716205e3-e2b1-405b-94ac-63bf62b32a66"
+# }
+
+# STATUS CODE 400 (Weak Password)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Password must be at least 8 characters",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Password must be at least 8 characters",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "2874eaed-531b-4"
+# }
+
+
+### =========================================================================
+### PROFILE APIS
+### =========================================================================
+
+### GET MY PROFILE
+# @Module: PROFILE APIS
+# @Description: Retrieves the authenticated user's profile information.
+GET {{baseUrl}}/api/me
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "User profile fetched successfully.",
+#   "data": {
+#     "id": "6fc24bd0-ec0c-4be8-a5c4-29e0eb23f662",
+#     "email": "mathanmithun8838@gmail.com",
+#     "full_name": "MaThanMiThun",
+#     "username": "mathanmithun",
+#     "bio": "Video creator and tech enthusiast.",
+#     "social_links": [
+#       "https://twitter.com/mathanmithun",
+#       "https://youtube.com/mathanmithun"
+#     ],
+#     "plan": "free",
+#     "role": "user",
+#     "monthly_credits_balance": 100,
+#     "purchased_credits_balance": 0,
+#     "primary_language": "english",
+#     "interface_language": "english",
+#     "default_spoken_lang": "tamil",
+#     "default_caption_lang": "tanglish",
+#     "tutorial_completed": true,
+#     "email_verified": true,
+#     "created_at": "2026-02-21T11:34:40.363Z"
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "6fc24bd0..."
+# }
+
+# STATUS CODE 401 (Missing Token)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 401,
+#   "message": "Authentication token missing",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "UNAUTHORIZED",
+#       "message": "Authentication token missing",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "408d61ce-9a48-44cd-b666-05d40ebb740c"
+# }
+
+# STATUS CODE 401 (Invalid Token)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 401,
+#   "message": "Invalid or expired token",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "UNAUTHORIZED",
+#       "message": "Invalid or expired token",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "80baa839-1b9f-4f62-b4e8-e5a5ed48b80c"
+# }
+
+### UPDATE PROFILE
+# @Module: PROFILE APIS
+# @Description: Updates the user's profile details such as username, bio, and social links.
+PATCH {{baseUrl}}/api/me/profile
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "username": "mathan_updated",
+    "bio": "Updated bio for testing purposes",
+    "social_links": [
+        "https://twitter.com/mathan",
+        "https://github.com/mathan"
+    ]
+}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Profile updated successfully.",
+#   "data": {
+#     "id": "6fc24bd0-ec0c-4be8-a5c4-29e0eb23f662",
+#     "email": "mathanmithun8838@gmail.com",
+#     "full_name": "MaThanMiThun",
+#     "username": "mathan_updated",
+#     "bio": "Updated bio for testing purposes",
+#     "social_links": [
+#       "https://twitter.com/mathan",
+#       "https://github.com/mathan"
+#     ],
+#     "plan": "free",
+#     "role": "user",
+#     "monthly_credits_balance": 100,
+#     "purchased_credits_balance": 0,
+#     "primary_language": "english",
+#     "interface_language": "english",
+#     "default_spoken_lang": "tamil",
+#     "default_caption_lang": "tanglish",
+#     "tutorial_completed": true,
+#     "email_verified": true,
+#     "created_at": "2026-02-21T11:34:40.363Z"
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "6fc24bd0..."
+# }
+
+# STATUS CODE 400 (Validation Error - Username too short)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Username must be at least 3 characters",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Username must be at least 3 characters",
+#       "details": {
+#         "errors": [
+#           { "field": "username", "message": "Username must be at least 3 characters" }
+#         ]
+#       }
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "791dd7fe-22be-4fe9-b24b-9611a9c20816"
+# }
+
+# STATUS CODE 401 (Unauthorized)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 401,
+#   "message": "Authentication token missing",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "UNAUTHORIZED",
+#       "message": "Authentication token missing",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "7ee71e83-4cdf-4057-b777-5da39c9ee348"
+# }
+
+### UPDATE PREFERENCES
+# @Module: PROFILE APIS
+# @Description: Updates the user's app preferences like language and tutorial status.
+PATCH {{baseUrl}}/api/me/preferences
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "primary_language": "tamil",
+    "interface_language": "tamil",
+    "default_spoken_lang": "TAMIL",
+    "default_caption_lang": "ENGLISH",
+    "tutorial_completed": false
+}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Preferences updated successfully.",
+#   "data": {
+#     "id": "6fc24bd0-ec0c-4be8-a5c4-29e0eb23f662",
+#     "email": "mathanmithun8838@gmail.com",
+#     "full_name": "MaThanMiThun",
+#     "username": "mathan_updated",
+#     "bio": "Updated bio for testing purposes",
+#     "social_links": [
+#       "https://twitter.com/mathan",
+#       "https://github.com/mathan"
+#     ],
+#     "plan": "free",
+#     "role": "user",
+#     "monthly_credits_balance": 100,
+#     "purchased_credits_balance": 0,
+#     "primary_language": "tamil",
+#     "interface_language": "tamil",
+#     "default_spoken_lang": "tamil",
+#     "default_caption_lang": "english",
+#     "tutorial_completed": false,
+#     "email_verified": true,
+#     "created_at": "2026-02-21T11:34:40.363Z"
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "6fc24bd0..."
+# }
+
+# STATUS CODE 400 (Validation Error - Invalid Language)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Primary language must be one of: english, hindi, tamil, telugu, kannada, malayalam",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Primary language must be one of: english, hindi, tamil, telugu, kannada, malayalam",
+#       "details": {
+#         "errors": [
+#           { "field": "primary_language", "message": "Primary language must be one of: english, hindi, tamil, telugu, kannada, malayalam" }
+#         ]
+#       }
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "b179953e-bda2-4837-826d-d70c37b8f98e"
+# }
+
+# STATUS CODE 401 (Unauthorized)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 401,
+#   "message": "Authentication token missing",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "UNAUTHORIZED",
+#       "message": "Authentication token missing",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "7d23c05d-bb32-42c3-9479-a5fb1cac82bb"
+# }
+
+### CHANGE PASSWORD
+# @Module: PROFILE APIS
+# @Description: Allows an authenticated user to change their password by providing the current password.
+POST {{baseUrl}}/api/me/change-password
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "current_password": "OldPass@123",
+    "new_password": "NewSecurePass@789"
+}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Password changed successfully.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "f8b17770..."
+# }
+
+# STATUS CODE 401 (Incorrect Current Password)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 401,
+#   "message": "Incorrect current password.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "INVALID_CURRENT_PASSWORD",
+#       "message": "Incorrect current password.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "f8b17770-dafa-43e9-841a-8358a04d2b5c"
+# }
+
+# STATUS CODE 400 (Weak New Password)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Password must be at least 8 characters",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Password must be at least 8 characters",
+#       "details": {
+#         "errors": [
+#           { "field": "new_password", "message": "Password must be at least 8 characters" },
+#           { "field": "new_password", "message": "Password must contain at least one uppercase letter and one number" }
+#         ]
+#       }
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "05bec939-1ca8-4052-86dc-65585e438382"
+# }
+
+
+
+### =========================================================================
+### CUSTOM VOCABULARY APIS
+### =========================================================================
+
+### GET MY VOCABULARY
+# @Module: VOCABULARY APIS
+# @Description: Retrieves all custom vocabulary entries for the authenticated user.
+GET {{baseUrl}}/api/me/vocabulary
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Custom vocabulary fetched successfully.",
+#   "data": [
+#     {
+#       "id": "e9c12345-6789-4abc-def1-234567890abc",
+#       "phrase": "Zenxify",
+#       "sounds_like": "zen-see-fy",
+#       "display_as": "Zenxify",
+#       "created_at": "2026-03-10T11:34:40.363Z"
+#     }
+#   ],
+#   "record_count": 1,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "e9c12345..."
+# }
+
+### ADD VOCABULARY ENTRY
+# @Module: VOCABULARY APIS
+# @Description: Adds a new word or phrase to the user's custom dictionary.
+POST {{baseUrl}}/api/me/vocabulary
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "phrase": "DHIWorks",
+    "sounds_like": "D-H-I-works",
+    "display_as": "DHIWorks"
+}
+
+# STATUS CODE 201 (Created)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 201,
+#   "message": "Vocabulary entry added successfully.",
+#   "data": {
+#     "id": "f0d23456-7890-4bcd-ef23-456789012def",
+#     "phrase": "DHIWorks",
+#     "sounds_like": "D-H-I-works",
+#     "display_as": "DHIWorks"
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "f0d23456..."
+# }
+
+# STATUS CODE 400 (Validation Error - Missing Phrase)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 400,
+#   "message": "Phrase is required",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "VALIDATION_ERROR",
+#       "message": "Phrase is required",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "791dd7fe-22be-4fe9-b24b-9611a9c20816"
+# }
+
+### DELETE VOCABULARY ENTRY
+# @Module: VOCABULARY APIS
+# @Description: Removes a specific vocabulary entry by its ID.
+DELETE {{baseUrl}}/api/me/vocabulary/8af3e9c6-75f6-4337-bb1d-7544a421db12
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Vocabulary entry removed successfully.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "8af3e9c6..."
+# }
+
+# STATUS CODE 404 (Not Found)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 404,
+#   "message": "Vocabulary entry not found.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "NOT_FOUND",
+#       "message": "Vocabulary entry not found.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "80baa839-1b9f-4f62-b4e8-e5a5ed48b80c"
+# }
+
+
+### =========================================================================
+### NOTIFICATION APIS
+### =========================================================================
+
+### LIST NOTIFICATIONS
+# @Module: NOTIFICATION APIS
+# @Description: Retrieves a paginated list of notifications for the user.
+GET {{baseUrl}}/api/notifications?unread_only=false&page=1&limit=20
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Notifications fetched successfully.",
+#   "data": {
+#     "total_items": 1,
+#     "page": 1,
+#     "limit": 20,
+#     "notifications": [
+#       {
+#         "id": "e3525467-0081-441c-b472-9a7735a1fd1e",
+#         "type": "processing_complete",
+#         "title": "Project Ready",
+#         "message": "Your project is ready for review.",
+#         "is_read": false,
+#         "created_at": "2026-03-21T14:45:50.721Z"
+#       }
+#     ]
+#   }
+# }
+
+### MARK NOTIFICATION AS READ
+# @Module: NOTIFICATION APIS
+# @Description: Marks a specific notification as read by its ID.
+PATCH {{baseUrl}}/api/notifications/e3525467-0081-441c-b472-9a7735a1fd1e/read
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+
+### MARK ALL AS READ
+# @Module: NOTIFICATION APIS
+# @Description: Marks all unread notifications for the user as read.
+PATCH {{baseUrl}}/api/notifications/read-all
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+
+### DELETE MULTIPLE NOTIFICATIONS
+# @Module: NOTIFICATION APIS
+# @Description: Removes a selection of notifications using an array of IDs.
+DELETE {{baseUrl}}/api/notifications/bulk
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "ids": ["9285d85f-d9d2-49a5-8e89-eeb5de6d30bd", "ec37fe15-062a-4284-8224-2d55ccda0df0"]
+}
+
+# STATUS CODE 200 (Success)
+
+### DELETE ALL NOTIFICATIONS
+# @Module: NOTIFICATION APIS
+# @Description: Clears the entire notification box for the authenticated user.
+DELETE {{baseUrl}}/api/notifications/all
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+
+### NOTIFICATION STREAM (SSE)
+# @Module: NOTIFICATION APIS
+# @Description: Real-time Server-Sent Events stream for notifications.
+GET {{baseUrl}}/api/notifications/stream
+Authorization: Bearer {{authToken}}
+Accept: text/event-stream
+
+
+### =========================================================================
+### ADMIN ONLY ROUTES
+### =========================================================================
+
+### =========================================================================
+### ADMIN USER MANAGEMENT APIS
+### =========================================================================
+
+### LIST USERS
+# @Module: ADMIN USERS
+# @Description: Retrieves a paginated list of all users. Supports search (email/name) and filtering.
+GET {{baseUrl}}/api/admin/users?page=1&limit=5&search=&plan=free&role=user
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "User list fetched successfully.",
+#   "data": {
+#     "totalItems": 18,
+#     "totalPages": 1,
+#     "currentPage": 1,
+#     "users": [...]
+#   },
+#   "record_count": 18,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "req-123..."
+# }
+
+### UPDATE USER (ADMIN)
+# @Module: ADMIN USERS
+# @Description: Administratively update user role, plan, or status.
+# @Param: id - The UUID of the user to update.
+PATCH {{baseUrl}}/api/admin/users/6fc24bd0-ec0c-4be8-a5c4-29e0eb23f662
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "plan": "enterprise",
+    "is_active": true
+}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "User updated successfully.",
+#   "data": { "id": "...", "role": "admin", ... },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "req-123..."
+# }
+
+### ADJUST USER CREDITS (ADMIN)
+# @Module: ADMIN USERS
+# @Description: Manually add or subtract credits from a user's account.
+# @Param: id - The UUID of the user.
+POST {{baseUrl}}/api/admin/users/6fc24bd0-ec0c-4be8-a5c4-29e0eb23f662/adjust-credits
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "amount": 500,
+    "type": "credit",
+    "description": "Customer loyalty bonus / Manual top-up"
+}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Successfully credited 500 credits.",
+#   "data": {
+#     "old_balance": 100,
+#     "new_balance": 600 
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "req-123..."
+# }
+
+### FORCE DELETE USER (ADMIN)
+# @Module: ADMIN USERS
+# @Description: Permanently removes a user and all their data (Hard Delete).
+# @Param: id - The UUID of the user.
+DELETE {{baseUrl}}/api/admin/users/6fc24bd0-ec0c-4be8-a5c4-29e0eb23f662
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "User account permanently deleted successfully.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "req-123..."
+# }
+
+# STATUS CODE 409 (Data Exists)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 409,
+#   "message": "Unsafe operation: User has existing data (3 projects, 1 subscriptions, 12 transactions). Please clear or migrate these records before hard deleting the account.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "ASSOCIATED_DATA_EXISTS",
+#       "message": "Unsafe operation: User has existing data (3 projects, 1 subscriptions, 12 transactions). Please clear or migrate these records before hard deleting the account.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "req-123..."
+# }
+
+
+### =========================================================================
+### ERROR LOGS APIS (ADMIN ONLY)
+### =========================================================================
+
+### GET ALL ERROR LOGS
+# @Module: ERROR LOGS
+# @Description: Retrieves a paginated list of error logs. Supports searching and date filtering. (Admin only)
+GET {{baseUrl}}/api/admin/error-logs?page=1&limit=100&search=
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Error logs fetched successfully.",
+#   "data": {
+#     "totalItems": 0,
+#     "totalPages": 0,
+#     "currentPage": 1,
+#     "logs": []
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "req-123..."
+# }
+
+# STATUS CODE 403 (Forbidden - Not Admin)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 403,
+#   "message": "This resource requires administrator privileges",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "ADMIN_REQUIRED",
+#       "message": "This resource requires administrator privileges",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "78c9ad5a-ba3d-49d7-83eb-275d27572d4c"
+# }
+
+### GET SINGLE ERROR LOG
+# @Module: ERROR LOGS
+# @Description: Retrieves a specific error log trace by its ID. (Admin only)
+GET {{baseUrl}}/api/admin/error-logs/1
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Error log fetched successfully.",
+#   "data": {
+#     "log_id": 1,
+#     "file_name": "error_logs.service.js",
+#     "function_name": "getLogById",
+#     "error_message": "Error: Error log not found.",
+#     "error_code": "LOG_NOT_FOUND",
+#     "created_by": "SYSTEM",
+#     "created_at": "2026-02-26T12:00:00.000Z"
+#   },
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "req-123..."
+# }
+
+# STATUS CODE 404 (Log Not Found)
+# RESPONSE BODY
+# {
+#   "status": "error",
+#   "code": 404,
+#   "message": "Error log not found.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [
+#     {
+#       "code": "LOG_NOT_FOUND",
+#       "message": "Error log not found.",
+#       "details": {}
+#     }
+#   ],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "a6383ba0-0de3-42c7-941e-99e1c6187997"
+# }
+
+### DELETE ERROR LOG
+# @Module: ERROR LOGS
+# @Description: Deletes a specific error log by its ID. (Admin only)
+DELETE {{baseUrl}}/api/admin/error-logs/1
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Error log deleted successfully.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "req-123..."
+# }
+
+### CLEAR ALL ERROR LOGS
+# @Module: ERROR LOGS
+# @Description: Wipes the entire error_logs table. Use with extreme caution. (Admin only)
+DELETE {{baseUrl}}/api/admin/error-logs/clear
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "All error logs have been cleared successfully.",
+#   "data": null,
+#   "record_count": 0,
+#   "errors": [],
+#   "timestamp": "2026-03-13T08:08:21.094Z",
+#   "request_id": "req-123..."
+# }
+
+
+### =========================================================================
+### ADMIN PLAN MANAGEMENT APIS (ADMIN ONLY)
+### =========================================================================
+
+### LIST ALL PLANS
+# @Module: ADMIN PLANS
+# @Description: Retrieves a list of all subscription plans, including inactive ones.
+GET {{baseUrl}}/api/admin/plans?include_inactive=true
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Subscription plans retrieved successfully",
+#   "data": {
+#     "plans": [
+#       {
+#         "id": "...",
+#         "slug": "pro",
+#         "label": "Pro",
+#         "monthly_credits": 1000,
+#         "is_active": true,
+#         ...
+#       }
+#     ]
+#   },
+#   "record_count": 4,
+#   "errors": [],
+#   "timestamp": "2026-03-21T12:00:00.000Z",
+#   "request_id": "req-123"
+# }
+
+### GET PLAN DETAILS
+# @Module: ADMIN PLANS
+# @Description: Retrieves full metadata for a specific plan, including feature flags.
+GET {{baseUrl}}/api/admin/plans/pro
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Plan details for 'pro' retrieved successfully",
+#   "data": {
+#     "plan": {
+#       "slug": "pro",
+#       "features": {
+#         "vad_auto_cut": true,
+#         "transcription": true,
+#         "export_4k": true
+#       },
+#       "monthly_credits": 1000,
+#       "storage_quota_gb": 50
+#     }
+#   }
+# }
+
+### UPDATE PLAN
+# @Module: ADMIN PLANS
+# @Description: Updates plan features, pricing, or limits.
+PATCH {{baseUrl}}/api/admin/plans/pro
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "monthly_credits": 1000,
+    "features": {
+        "export_8k": true
+    },
+    "storage_quota_gb": 50
+}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Plan 'pro' updated successfully",
+#   "data": { "plan": { ... } }
+# }
+
+### LIST ALL TOP-UP PACKS
+# @Module: ADMIN PLANS
+# @Description: Retrieves all credit top-up packs.
+GET {{baseUrl}}/api/admin/plans/top-ups/all
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+
+### UPDATE TOP-UP PACK
+# @Module: ADMIN PLANS
+# @Description: Updates price or credit amount for a specific pack.
+PATCH {{baseUrl}}/api/admin/plans/top-ups/starter
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "price_inr": 599,
+    "credits": 500
+}
+
+# STATUS CODE 200 (Success)

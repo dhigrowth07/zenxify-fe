@@ -2,6 +2,8 @@ import moment from 'moment';
 import { useTheme } from '../../hooks/useTheme';
 import { toast } from '../../utils/toastHandler';
 import { formatDate, formatRelativeTime } from '../../utils/date';
+import { Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const SampleDesign = () => {
     const { isDark, toggleTheme } = useTheme();
@@ -103,6 +105,13 @@ const SampleDesign = () => {
                         </div>
                     </div>
                 </section>
+
+                <div>
+                    <Link to="/dashboard">Dashboard</Link>
+                    <Link to="/login">
+                        Login
+                    </Link>
+                </div>
 
                 <footer className="pt-6 border-t border-border-light dark:border-gray-800 text-center">
                     <p className="body-text text-sm! opacity-50">Zenxify SDK v1.1.0 • Built with Passion</p>

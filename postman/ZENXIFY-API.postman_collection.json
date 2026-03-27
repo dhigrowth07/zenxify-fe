@@ -1,0 +1,1490 @@
+{
+  "info": {
+    "_postman_id": "870d0593-d6da-48e6-91db-8ac172516623",
+    "name": "ZENXIFY-API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "36765469"
+  },
+  "item": [
+    {
+      "name": "AUTH APIS",
+      "item": [
+        {
+          "name": "REGISTER A USER",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"full_name\": \"MaThanMiThun\",\r\n    \"email\": \"mathanmithun8838@gmail.com\",\r\n    \"password\": \"Mathan@1999\",\r\n    \"tos_accepted\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/auth/register",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "VERIFY EMAIL",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/auth/verify-email?token=108bfb3914a1f8c6af99b487343a207d39a01f392d38e36fd78aca70d7e843d1",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "verify-email"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "108bfb3914a1f8c6af99b487343a207d39a01f392d38e36fd78aca70d7e843d1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LOGIN A USER",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"admin@zenxify.com\",\r\n    \"password\": \"Admin@123\"\r\n}\r\n// {\r\n//     \"email\": \"mathanmithun8838@gmail.com\",\r\n//     \"password\": \"Mathan@8838\"\r\n// }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/auth/login",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RESEND VERIFY EMAIL",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"mathanmithun8838@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/auth/resend-verification",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "resend-verification"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "REFERESH TOKEN",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZmYzI0YmQwLWVjMGMtNGJlOC1hNWM0LTI5ZTBlYjIzZjY2MiIsImVtYWlsIjoibWF0aGFubWl0aHVuODgzOEBnbWFpbC5jb20iLCJwbGFuIjoiZnJlZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzcxNjc0Mjk5LCJleHAiOjE3NzIyNzkwOTl9.bxx2FPXdZHjT0dJZZlnEmZ3Rwm2ywyvoZevW_uNriXU\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/auth/refresh",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LOGOUT A USER",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZmYzI0YmQwLWVjMGMtNGJlOC1hNWM0LTI5ZTBlYjIzZjY2MiIsImVtYWlsIjoibWF0aGFubWl0aHVuODgzOEBnbWFpbC5jb20iLCJwbGFuIjoiZnJlZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzcxNjc0MjU2LCJleHAiOjE3NzIyNzkwNTZ9.x7s4LwdBuE0WlTEISPxFAQ4wqA1hlwDYGW_bR7dYCes\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/auth/logout",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "FORGET PASSWORD",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"mathanmithun@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/auth/forgot-password",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RESET PASSWORD",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"token\": \"e88872734924e51bfe2d33335799b93cee3fb647e36a5b6305063b636dd41420\",\r\n    \"new_password\": \"Mathan@8838\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/auth/reset-password",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "reset-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PROFILE APIS",
+      "item": [
+        {
+          "name": "GET MY PROFILE",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"mathanmithun8838@gmail.com\",\r\n    \"password\": \"Mathan@8838\"\r\n}"
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/me",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ADD VOCABULARY ENTRY",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"phrase\": \"DHIWorks\",\r\n    \"sounds_like\": \"D-H-I-works\",\r\n    \"display_as\": \"DHIWorks\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/me/vocabulary",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "vocabulary"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET VOCABULARY ENTRY",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"phrase\": \"DHIWorks\",\r\n    \"sounds_like\": \"D-H-I-works\",\r\n    \"display_as\": \"DHIWorks\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/me/vocabulary",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "vocabulary"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE VOCABULARY ENTRY",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"mathanmithun8838@gmail.com\",\r\n    \"password\": \"Mathan@8838\"\r\n}"
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/me/vocabulary/28500d4d-0974-41a5-becd-191ffe1d7390",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "vocabulary",
+                "28500d4d-0974-41a5-becd-191ffe1d7390"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE PROFILE",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"mathanmithun\",\r\n    \"bio\": \"Video creator and tech enthusiast.\",\r\n    \"social_links\": [\r\n        \"https://twitter.com/mathanmithun\",\r\n        \"https://youtube.com/mathanmithun\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/me/profile",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE PREFERENCES",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"primary_language\": \"english\",\r\n    \"interface_language\": \"english\",\r\n    \"default_spoken_lang\": \"TAMIL\",\r\n    \"default_caption_lang\": \"TANGLISH\",\r\n    \"tutorial_completed\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/me/preferences",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "preferences"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CHANGE PASSWORD",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"current_password\": \"Mathan@8838\",\r\n    \"new_password\": \"Mathan@1999\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/me/change-password",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LIST ACTIVE SESSIONS",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"current_password\": \"Mathan@8838\",\r\n    \"new_password\": \"Mathan@1999\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/me/sessions",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "sessions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE ACCOUNT (SOFT DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"current_password\": \"Mathan@8838\",\r\n    \"new_password\": \"Mathan@1999\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/me/sessions",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "sessions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PROJECT APIS",
+      "item": [
+        {
+          "name": "LIST PROJECTS",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/projects?page=1&limit=10",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CREATE PROJECT",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"My New Video\",\n    \"spoken_language\": \"english\",\n    \"caption_language\": \"english\",\n    \"broll_opted_in\": false,\n    \"layout_template\": \"default\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/projects",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET PROJECT BY ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/projects/{{PROJECT_ID}}",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{PROJECT_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE PROJECT TITLE",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated Title\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/projects/{{PROJECT_ID}}",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{PROJECT_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DUPLICATE PROJECT",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/projects/{{PROJECT_ID}}/duplicate",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{PROJECT_ID}}",
+                "duplicate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SOFT DELETE PROJECT",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/projects/{{PROJECT_ID}}",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{PROJECT_ID}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "STORAGE APIS",
+      "item": [
+        {
+          "name": "GET PRESIGNED UPLOAD URL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"projectId\": \"{{PROJECT_ID}}\",\n    \"contentType\": \"video/mp4\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/storage/presign/upload",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "presign",
+                "upload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CONFIRM UPLOAD COMPLETE",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"projectId\": \"{{PROJECT_ID}}\",\n    \"s3Key\": \"users/{{USER_ID}}/projects/{{PROJECT_ID}}/raw/original.mp4\",\n    \"fileSize\": 10485760\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/storage/upload-complete",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "upload-complete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET DOWNLOAD URL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/storage/presign/download?s3Key=SOME_KEY",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "presign",
+                "download"
+              ],
+              "query": [
+                {
+                  "key": "s3Key",
+                  "value": "SOME_KEY"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ADMIN",
+      "item": [
+        {
+          "name": "USER MANAGEMENT APIS",
+          "item": [
+            {
+              "name": "GET ALL USERS",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"phrase\": \"DHIWorks\",\r\n    \"sounds_like\": \"D-H-I-works\",\r\n    \"display_as\": \"DHIWorks\"\r\n}\r\n"
+                },
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/users?page=1&limit=100&search=&role=user",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "100"
+                    },
+                    {
+                      "key": "search",
+                      "value": ""
+                    },
+                    {
+                      "key": "plan",
+                      "value": "free",
+                      "disabled": true
+                    },
+                    {
+                      "key": "role",
+                      "value": "user"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "UPDATE USER",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"plan\": \"enterprise\",\r\n    \"is_active\": true\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/users/ca0be2f0-95e0-46fc-a7de-188975b43cc6",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "users",
+                    "ca0be2f0-95e0-46fc-a7de-188975b43cc6"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ADJUST USER CREDITS",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"amount\": 500,\r\n    \"type\": \"credit\",\r\n    \"description\": \"Customer loyalty bonus / Manual top-up\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/users/ca0be2f0-95e0-46fc-a7de-188975b43cc6/adjust-credits",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "users",
+                    "ca0be2f0-95e0-46fc-a7de-188975b43cc6",
+                    "adjust-credits"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "FORCE DELETE USER",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"amount\": 500,\r\n    \"type\": \"credit\",\r\n    \"description\": \"Customer loyalty bonus / Manual top-up\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/users/ca0be2f0-95e0-46fc-a7de-188975b43cc6",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "users",
+                    "ca0be2f0-95e0-46fc-a7de-188975b43cc6"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "ERROR LOGS APIS",
+          "item": [
+            {
+              "name": "GET ALL ERROR LOGS",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/error-logs?page=1&limit=100&search=",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "error-logs"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "100"
+                    },
+                    {
+                      "key": "search",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GET SINGLE ERROR LOG",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/error-logs/10",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "error-logs",
+                    "10"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "DELETE ERROR LOG",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/error-logs/11",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "error-logs",
+                    "11"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CLEAR ALL ERROR LOGS",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/error-logs/clear",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "error-logs",
+                    "clear"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "PLAN MANAGEMENT APIS",
+          "item": [
+            {
+              "name": "LIST ALL PLANS",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/plans?include_inactive=true",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "plans"
+                  ],
+                  "query": [
+                    {
+                      "key": "include_inactive",
+                      "value": "true"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GET PLAN DETAILS",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/plans/pro",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "plans",
+                    "pro"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "UPDATE PLAN",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"monthly_credits\": 1000,\n    \"features\": {\n        \"export_8k\": true\n    },\n    \"storage_quota_gb\": 50\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/plans/pro",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "plans",
+                    "pro"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "LIST ALL TOP-UP PACKS",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/plans/top-ups/all",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "plans",
+                    "top-ups",
+                    "all"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "UPDATE TOP-UP PACK",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"price_inr\": 599,\n    \"credits\": 500\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{API_URL}}/api/admin/plans/top-ups/starter",
+                  "host": [
+                    "{{API_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "plans",
+                    "top-ups",
+                    "starter"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NOTIFICATION APIS",
+      "item": [
+        {
+          "name": "LIST NOTIFICATIONS",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/notifications?unread_only=false&page=1&limit=20",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "unread_only",
+                  "value": "false"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "MARK AS READ",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/notifications/{{NOTIFICATION_ID}}/read",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "{{NOTIFICATION_ID}}",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "MARK ALL AS READ",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/notifications/read-all",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE BULK",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ids\": [\"ID_1\", \"ID_2\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/notifications/bulk",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "bulk"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE ALL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/notifications/all",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "STREAM (SSE)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/api/notifications/stream",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "stream"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ENTRY POINT",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tenant_admin_token}}"
+          },
+          {
+            "key": "tenant_id",
+            "value": "{{tenant_id}}"
+          },
+          {
+            "key": "admin_id",
+            "value": "{{admin_id}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"block_name\": \"Block A\",\n  \"address\": \"123 Main St\",\n  \"total_floors\": 3\n}"
+        },
+        "url": {
+          "raw": "{{API_URL}}",
+          "host": [
+            "{{API_URL}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "HEALTH CHECK",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tenant_admin_token}}"
+          },
+          {
+            "key": "tenant_id",
+            "value": "{{tenant_id}}"
+          },
+          {
+            "key": "admin_id",
+            "value": "{{admin_id}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"block_name\": \"Block A\",\n  \"address\": \"123 Main St\",\n  \"total_floors\": 3\n}"
+        },
+        "url": {
+          "raw": "{{API_URL}}/health",
+          "host": [
+            "{{API_URL}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

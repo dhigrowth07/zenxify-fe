@@ -5,14 +5,29 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@layer base {
-  @font-face {
-    font-family: 'Restore';
-    src: url('./assets/font/Restore-W00-Black.ttf') format('truetype');
-    font-weight: 900;
-    font-style: normal;
-    font-display: swap;
-  }
+@theme {
+    --animate-spin: spin 1s linear infinite;
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
 }
 
+@layer base {
+    @font-face {
+        font-family: 'Restore';
+        src: url('./assets/font/Restore-W00-Black.ttf') format('truetype');
+        font-weight: 900;
+        font-style: normal;
+        font-display: swap;
+    }
+}
 
+.animate-spin {
+    animation: spin 1s linear infinite !important;
+}

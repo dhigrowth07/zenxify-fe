@@ -1,32 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MailCheck, Loader2, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { verifyEmail } from '../../../services/authServices';
+import { loginSuccess } from '../../../redux/auth/authSlice';
+import { toast } from '../../../utils/toastHandler';
 
 const EmailVerificationForm = () => {
     const [status, setStatus] = useState('verifying'); // 'verifying', 'success', 'error'
+    const [errorMessage, setErrorMessage] = useState('');
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
+
+    // Prevent double execution in Strict Mode
+    const hasCalledRef = useRef(false);
+
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!token) {
             setStatus('error');
+            setErrorMessage("No verification token was found in the link.");
             return;
         }
 
-        // Simulating an API call for verification
-        // In a real app, you would perform: axios.post('/api/auth/verify-email', { token })
-        const verify = async () => {
+        // Only run if not already called
+        if (hasCalledRef.current) return;
+
+        const runVerification = async () => {
+            hasCalledRef.current = true; // Guard it immediately
             try {
-                // Simulate network latency
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                setStatus('success');
+                const result = await verifyEmail(token);
+
+                if (result.status === 'success') {
+                    setStatus('success');
+
+                    // Auto-Login Logic
+                    if (result.data && result.data.accessToken) {
+                        dispatch(loginSuccess({
+                            accessToken: result.data.accessToken,
+                            refreshToken: result.data.refreshToken,
+                            user: result.data.user
+                        }));
+
+                        toast.success("Account Verified!", "Logging you in automatically...");
+
+                        // Redirect after a short delay so user sees the success state
+                        setTimeout(() => {
+                            navigate('/');
+                        }, 2000);
+                    }
+                } else {
+                    setStatus('error');
+                    setErrorMessage(result.message || "Verification failed. The link might be expired.");
+                }
             } catch (err) {
+                console.error('Verification failed:', err);
                 setStatus('error');
+                setErrorMessage("An unexpected error occurred. Please try again later.");
             }
         };
 
-        verify();
-    }, [token]);
+        runVerification();
+    }, [token, dispatch, navigate]);
 
     return (
         <div className="flex justify-center items-center h-screen w-full p-4 overflow-hidden">
@@ -64,13 +101,16 @@ const EmailVerificationForm = () => {
                                     Email Verified!
                                 </h1>
                                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
-                                    Your account is now ready. You can log in and start using Zenxify.
+                                    Your account is now ready. We are logging you in...
                                 </p>
+                                <div className="flex justify-center mb-4">
+                                    <Loader2 className="animate-spin text-green-500" size={24} />
+                                </div>
                                 <Link
-                                    to="/login"
+                                    to="/"
                                     className="inline-flex items-center gap-2 w-full justify-center p-3 text-white bg-brand-gradient rounded-lg transition transform duration-300 shadow-lg hover:scale-[1.02] active:scale-[0.98] font-bold uppercase tracking-wider"
                                 >
-                                    Proceed to Login
+                                    Go to Dashboard
                                     <ArrowRight size={20} />
                                 </Link>
                             </div>
@@ -87,14 +127,14 @@ const EmailVerificationForm = () => {
                                     Verification Failed
                                 </h1>
                                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
-                                    The verification link is invalid, expired, or has already been used.
+                                    {errorMessage}
                                 </p>
                                 <div className="space-y-3">
                                     <Link
-                                        to="/register"
+                                        to="/login"
                                         className="inline-flex items-center gap-2 w-full justify-center p-3 text-white bg-brand-gradient rounded-lg transition transform duration-300 shadow-lg font-bold uppercase tracking-wider"
                                     >
-                                        Back to Sign Up
+                                        Back to Login
                                     </Link>
                                     <p className="text-xs text-gray-400">
                                         Need help? <a href="#" className="text-primary hover:underline">Contact Support</a>
@@ -108,6 +148,6 @@ const EmailVerificationForm = () => {
             </div>
         </div>
     );
-}
+};
 
 export default EmailVerificationForm;

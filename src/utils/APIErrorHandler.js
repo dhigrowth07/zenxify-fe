@@ -1,5 +1,12 @@
 export const handleApiError = (error) => {
-  const fallback = { success: false, msg: "An error occurred" };
+  const fallback = {
+    status: "error",
+    code: error?.response?.status || 500,
+    message: "A network error occurred. Please try again later.",
+    data: null,
+    errors: [],
+    timestamp: new Date().toISOString(),
+  };
 
   if (!error?.response?.data) {
     return fallback;
@@ -7,10 +14,20 @@ export const handleApiError = (error) => {
 
   const data = error.response.data;
 
-  const msg = data.msg || data.message || (typeof data === "string" ? data : undefined) || fallback.msg;
+  if (typeof data === "string") {
+    return { ...fallback, message: data, msg: data };
+  }
+
+  const message =
+    data.message ||
+    (data.errors?.length > 0 ? data.errors[0].message : null) ||
+    fallback.message;
 
   return {
+    ...fallback,
     ...data,
-    msg,
+    message,
+    msg: message,
   };
 };
+
