@@ -10,6 +10,7 @@ import RegisterPage from './pages/authpages/RegisterPage';
 import ForgotPasswordPage from './pages/authpages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/authpages/ResetPasswordPage';
 import EmailVerificationPage from './pages/authpages/EmailVerificationPage';
+import DashboardLayout from './layouts/DashboardLayout';
 import DashboardPage from './pages/DashboardPage';
 
 const Router = () => {
@@ -28,7 +29,7 @@ const Router = () => {
         </Route>
 
         <Route element={<ProtectedRoute />}>
-          <Route element={<UserLayout />}>
+          <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
           </Route>
         </Route>
