@@ -2,12 +2,14 @@ import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import authReducer from "./auth/authSlice";
+import profileReducer from "./profile/profileSlice";
+import notificationReducer from "./notifications/notificationSlice";
 
 const rootPersistConfig = {
   key: "root",
   version: 1,
   storage,
-  blacklist: ["auth"], 
+  blacklist: ["auth", "profile", "notifications"], 
 };
 
 const authPersistConfig = {
@@ -16,8 +18,22 @@ const authPersistConfig = {
   blacklist: ["isLoading", "isInitialized"],
 };
 
+const profilePersistConfig = {
+  key: "profile",
+  storage,
+  blacklist: ["isLoading", "error"],
+};
+
+const notificationPersistConfig = {
+  key: "notifications",
+  storage,
+  blacklist: ["isLoading", "error"],
+};
+
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
+  profile: persistReducer(profilePersistConfig, profileReducer),
+  notifications: persistReducer(notificationPersistConfig, notificationReducer),
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);

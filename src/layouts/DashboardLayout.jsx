@@ -1,15 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Bell, Zap } from 'lucide-react';
 import { Outlet } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import Sidebar from '../components/shared/Sidebar';
+import NotificationPanel from '../components/shared/NotificationPanel';
+import { 
+    fetchNotificationsAsync, 
+    addNotification, 
+    selectUnreadCount 
+} from '../redux/notifications/notificationSlice';
+import { initNotificationStream } from '../services/notificationServices';
 
 const DashboardLayout = () => {
-    // Default to collapsed if on mobile (width < 768px)
-    const [isCollapsed, setIsCollapsed] = React.useState(window.innerWidth < 768);
+    const dispatch = useDispatch();
+    const unreadCount = useSelector(selectUnreadCount);
+    const accessToken = useSelector((/** @type {any} */ state) => state.auth?.accessToken);
+    const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
+    const [showNotifications, setShowNotifications] = useState(false);
+    /** @type {React.MutableRefObject<HTMLDivElement|null>} */
+    const notificationRef = useRef(null);
 
-    React.useEffect(() => {
+    // Initialize notifications and SSE stream
+    useEffect(() => {
+        console.log("[SSE] effect running. token present:", !!accessToken);
+        if (!accessToken) return;
+
+        // Fetch initial notifications
+        /** @type {any} */ (dispatch)(fetchNotificationsAsync({ page: 1, limit: 20 }));
+
+        // Init real-time stream
+        const closeStream = initNotificationStream({
+            token: accessToken,
+            onNotification: (notification) => {
+                console.log("[SSE] Received new notification:", notification);
+                dispatch(addNotification(notification));
+            },
+            onError: (err) => {
+                console.warn("[SSE] Notification stream error, auto-reconnecting...", err);
+            }
+        });
+
+        const handleClickOutside = (/** @type {MouseEvent} */ event) => {
+            if (notificationRef.current && !notificationRef.current.contains(/** @type {Node} */ (event.target))) {
+                setShowNotifications(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        
+        return () => {
+            closeStream();
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [dispatch, accessToken]);
+
+    useEffect(() => {
         const handleResize = () => {
-            // Auto-collapse if window is resized below 768px
             if (window.innerWidth < 768 && !isCollapsed) {
                 setIsCollapsed(true);
             }
@@ -38,12 +84,28 @@ const DashboardLayout = () => {
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <button className="relative p-3 bg-[#EEF2F6] dark:bg-gray-900/50 text-charcoal dark:text-gray-400 hover:text-primary transition-all hover:bg-primary/5 rounded-full group active:scale-90 shadow-sm border border-black/5 dark:border-white/5">
-                            <Bell size={20} strokeWidth={2} />
-                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-gray-900 shadow-md transform group-hover:scale-110 transition-transform">
-                                1
-                            </div>
-                        </button>
+                        <div className="relative" ref={notificationRef}>
+                            <button 
+                                onClick={() => setShowNotifications(!showNotifications)}
+                                className={`relative p-3 transition-all rounded-full group active:scale-90 shadow-sm border ${
+                                    showNotifications 
+                                    ? 'bg-primary/10 text-primary border-primary/20' 
+                                    : 'bg-[#EEF2F6] dark:bg-gray-900/50 text-charcoal dark:text-gray-400 hover:text-primary hover:bg-primary/5 border-black/5 dark:border-white/5'
+                                }`}
+                            >
+                                <Bell size={20} strokeWidth={2} />
+                                {unreadCount > 0 && (
+                                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-gray-900 shadow-md transform group-hover:scale-110 transition-transform">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </div>
+                                )}
+                            </button>
+
+                            {showNotifications && (
+                                <NotificationPanel onClose={() => setShowNotifications(false)} />
+                            )}
+                        </div>
+
                         <button className="flex items-center gap-3 px-8 py-3.5 bg-charcoal dark:bg-primary text-white rounded-[20px] font-black uppercase tracking-widest text-xs hover:scale-[1.03] active:scale-95 transition-all shadow-xl hover:shadow-primary/30">
                             <Zap size={16} fill="currentColor" strokeWidth={0} />
                             Upgrade

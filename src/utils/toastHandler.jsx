@@ -111,3 +111,15 @@ export const toast = {
     // For now, focusing on the provided API.
   }
 };
+
+/**
+ * Standard utility for "Coming Soon" features.
+ * Displays a beautiful info toast.
+ * @param {string} featureName 
+ */
+export const showComingSoonToast = (featureName) => {
+  return toast.info(
+    "Coming Soon!",
+    `${featureName} will be available in a future update.`
+  );
+};

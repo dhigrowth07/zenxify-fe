@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZmYzI0YmQwLWVjMGMtNGJlOC1hNWM0LTI5ZTBlYjIzZjY2MiIsImVtYWlsIjoibWF0aGFubWl0aHVuODgzOEBnbWFpbC5jb20iLCJwbGFuIjoiZW50ZXJwcmlzZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc0MTA0NjY4LCJleHAiOjE3NzQxMDU1Njh9.dMXnlmCDCwYCKq-Z15cTyghHwjiOooOPzFGYuZMOdDM
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZmYzI0YmQwLWVjMGMtNGJlOC1hNWM0LTI5ZTBlYjIzZjY2MiIsImVtYWlsIjoibWF0aGFubWl0aHVuODgzOEBnbWFpbC5jb20iLCJwbGFuIjoiZW50ZXJwcmlzZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc1MTA1MzUzLCJleHAiOjE3NzUxMDYyNTN9.cIvqEy3WwEa0uPszgKnTVxQlvxY4Z5A3SXWuMJZPm8g
 @refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZmYzI0YmQwLWVjMGMtNGJlOC1hNWM0LTI5ZTBlYjIzZjY2MiIsImVtYWlsIjoibWF0aGFubWl0aHVuODgzOEBnbWFpbC5jb20iLCJwbGFuIjoiZW50ZXJwcmlzZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc0MTA0NjY4LCJleHAiOjE3NzQ3MDk0Njh9.fRVTP3w_bC9CLubUApY2bgFS_pOzish-U3hs4IqRReE
 
 @email = mathanmithun8838@gmail.com
@@ -749,6 +749,79 @@ Content-Type: application/json
 ### =========================================================================
 ### PROFILE APIS
 ### =========================================================================
+
+### GET DASHBOARD STATS
+# @Module: PROFILE APIS
+# @Description: Retrieves key statistics for the dashboard homepage including project counts, credit balances, and storage usage.
+GET {{baseUrl}}/api/me/stats
+Authorization: Bearer {{authToken}}
+
+# STATUS CODE 200 (Success)
+# RESPONSE BODY
+# {
+#   "status": "success",
+#   "code": 200,
+#   "message": "Dashboard stats fetched successfully.",
+#   "data": {
+#     "projects": {
+#       "total": 6,
+#       "completed": 0,
+#       "failed": 0,
+#       "processing": 6
+#     },
+#     "credits": {
+#       "monthly": 0,
+#       "purchased": 869,
+#       "total": 869
+#     },
+#     "storage": {
+#       "usedGb": 1.246,
+#       "quotaGb": "1000.00",
+#       "usagePercentage": 0.12
+#     },
+#     "recentProjects": [
+#       {
+#         "id": "acc700cd-9de3-488e-bbe5-e7dc2aacae75",
+#         "title": "MALAYALAM VIDEO",
+#         "status": "transcribed",
+#         "created_at": "2026-03-24T07:23:22.125Z",
+#         "thumbnail_s3_key": null
+#       },
+#       {
+#         "id": "283ad21b-abc6-4264-84c6-263ef802936b",
+#         "title": "Test Video",
+#         "status": "vad_review",
+#         "created_at": "2026-03-24T07:01:07.920Z",
+#         "thumbnail_s3_key": null
+#       },
+#       {
+#         "id": "e569410d-4e54-4a88-9707-00e89836d152",
+#         "title": "Tamil Transcription Test",
+#         "status": "merge_complete",
+#         "created_at": "2026-03-23T09:01:03.628Z",
+#         "thumbnail_s3_key": null
+#       },
+#       {
+#         "id": "32b9e36c-5d43-419d-8174-4d556c17e350",
+#         "title": "12 MINS VIDEO",
+#         "status": "transcribed",
+#         "created_at": "2026-03-19T08:45:20.064Z",
+#         "thumbnail_s3_key": null
+#       },
+#       {
+#         "id": "8951edfe-2269-4918-ac98-d21a40ed6ce2",
+#         "title": "NEW MULTIPLE VIDEOS",
+#         "status": "vad_review",
+#         "created_at": "2026-03-18T13:31:25.687Z",
+#         "thumbnail_s3_key": null
+#       }
+#     ]
+#   },
+#   "record_count": 5,
+#   "errors": [],
+#   "timestamp": "2026-04-02T04:49:57.751Z",
+#   "request_id": "23c26827-3031-4a63-9aa5-c9198cdf8ab3"
+# }
 
 ### GET MY PROFILE
 # @Module: PROFILE APIS

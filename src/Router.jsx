@@ -12,6 +12,8 @@ import ResetPasswordPage from './pages/authpages/ResetPasswordPage';
 import EmailVerificationPage from './pages/authpages/EmailVerificationPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import DashboardPage from './pages/DashboardPage';
+import AccountPage from './pages/settings/AccountPage';
+import GeneralPage from './pages/settings/GeneralPage';
 
 const Router = () => {
   return (
@@ -31,6 +33,8 @@ const Router = () => {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/settings/account" element={<AccountPage />} />
+            <Route path="/settings/general" element={<GeneralPage />} />
           </Route>
         </Route>
 
