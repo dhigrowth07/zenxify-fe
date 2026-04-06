@@ -43,9 +43,9 @@ const NotificationPanel = ({ onClose }) => {
     };
 
     return (
-        <div className="absolute top-full right-[-10px] mt-4 w-[360px] bg-white dark:bg-[#12101D] rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] border border-gray-100 dark:border-gray-800 z-70 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
-            {/* Pointer Arrow */}
-            <div className="absolute top-[-6px] right-[24px] w-3 h-3 bg-white dark:bg-[#12101D] border-t border-l border-gray-100 dark:border-gray-800 rotate-45 z-0" />
+        <div className="fixed md:absolute top-[90px] md:top-full inset-x-4 md:inset-auto md:right-[-10px] md:mt-4 md:w-[380px] bg-white dark:bg-[#12101D] rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] border border-gray-100 dark:border-gray-800 z-70 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+            {/* Pointer Arrow - Desktop Only */}
+            <div className="hidden md:block absolute top-[-6px] right-[24px] w-3 h-3 bg-white dark:bg-[#12101D] border-t border-l border-gray-100 dark:border-gray-800 rotate-45 z-0" />
             
             {/* Header ... */}
             <div className="p-5 border-b border-gray-50 dark:border-gray-800/50 flex items-center justify-between bg-white/50 dark:bg-gray-900/50 backdrop-blur-md sticky top-0 z-10">

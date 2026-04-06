@@ -131,24 +131,24 @@ const AccountPage = () => {
     ];
 
     return (
-        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-32">
+        <div className="flex flex-col gap-6 md:gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-32">
             {/* Page Header */}
-            <div className="flex flex-col gap-1">
-                <h1 className="text-3xl font-black tracking-tight text-charcoal dark:text-white uppercase font-display leading-tight">
+            <div className="flex flex-col gap-1 px-2 md:px-0">
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight text-charcoal dark:text-white uppercase font-display leading-tight">
                     Account <span className="text-primary italic">Settings</span>
                 </h1>
-                <p className="text-sm font-bold text-gray-500 dark:text-gray-400 opacity-80 uppercase tracking-widest">
+                <p className="text-[10px] md:text-sm font-bold text-gray-500 dark:text-gray-400 opacity-80 uppercase tracking-widest">
                     Manage your identity, security and sessions
                 </p>
             </div>
 
             {/* Mobile Responsive Tabs */}
-            <div className="flex w-fit bg-[#F9F9FB] dark:bg-gray-900/50 p-1.5 rounded-[24px] border border-gray-600 dark:border-gray-800 overflow-x-auto scrollbar-none sticky top-32 z-30 backdrop-blur-md">
+            <div className="flex w-full md:w-fit bg-white/80 dark:bg-gray-900/50 p-1.5 rounded-[24px] md:rounded-[32px] border border-gray-100 dark:border-gray-800 overflow-x-auto scrollbar-none sticky top-[72px] md:top-32 z-30 backdrop-blur-xl shadow-lg shadow-charcoal/5">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2.5 px-6 py-3 rounded-[20px] text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                        className={`flex items-center justify-center gap-2.5 px-5 md:px-8 py-3 md:py-4 rounded-[20px] md:rounded-[24px] text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex-1 md:flex-none ${
                             activeTab === tab.id 
                             ? 'bg-charcoal dark:bg-primary text-white shadow-xl shadow-primary/20 scale-[1.02]' 
                             : 'text-gray-500 hover:text-charcoal dark:hover:text-white'
@@ -166,15 +166,15 @@ const AccountPage = () => {
                 {activeTab === 'profile' && (
                     <div className="lg:col-span-8 flex flex-col gap-8">
                         {/* Profile Section */}
-                        <div className="p-8 bg-white dark:bg-gray-900/50 rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-xl shadow-charcoal/5 relative overflow-hidden group">
+                        <div className="p-5 md:p-10 bg-white dark:bg-gray-900/50 rounded-[32px] md:rounded-[48px] border border-gray-100 dark:border-gray-800 shadow-xl shadow-charcoal/5 relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 -mr-32 -mt-32 rounded-full blur-3xl transition-all group-hover:bg-primary/10" />
                             
-                            <form onSubmit={handleProfileSubmit} className="relative flex flex-col gap-10">
+                            <form onSubmit={handleProfileSubmit} className="relative flex flex-col gap-8 md:gap-12">
                                 {/* Avatar Section */}
-                                <div className="flex flex-wrap items-center gap-8">
+                                <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-10 text-center md:text-left">
                                     <div className="relative group/avatar">
-                                        <div className="w-28 h-28 rounded-[36px] bg-brand-gradient p-[2px] shadow-2xl transition-transform group-hover/avatar:rotate-6">
-                                            <div className="w-full h-full rounded-[34px] bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden border-4 border-transparent">
+                                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-[32px] md:rounded-[40px] bg-brand-gradient p-[2px] shadow-2xl transition-transform group-hover/avatar:rotate-6">
+                                            <div className="w-full h-full rounded-[30px] md:rounded-[38px] bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden border-4 border-transparent">
                                                 <img 
                                                     src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.full_name}`} 
                                                     alt="Avatar" 
@@ -182,54 +182,47 @@ const AccountPage = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <button 
-                                            type="button"
-                                            onClick={() => showComingSoonToast('Avatar Upload')}
-                                            className="absolute -bottom-2 -right-2 p-3 bg-white dark:bg-charcoal text-primary rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 hover:scale-110 active:scale-90 transition-all font-black"
-                                        >
-                                            <Camera size={20} />
-                                        </button>
                                     </div>
-                                    <div className="flex flex-col gap-2">
-                                        <h3 className="text-xl font-black text-charcoal dark:text-white uppercase font-display leading-none">
+                                    <div className="flex flex-col gap-3 justify-center">
+                                        <h3 className="text-xl md:text-2xl font-black text-charcoal dark:text-white uppercase font-display leading-none">
                                             {user?.full_name}
                                         </h3>
-                                        <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full w-fit">
+                                        <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full w-fit mx-auto md:mx-0">
                                             <CheckCircle2 size={12} className="text-primary" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Verified Account</span>
+                                            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-primary">Verified Account</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Form Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                                     <div className="flex flex-col gap-3">
-                                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Full Name</label>
+                                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Full Name</label>
                                         <input 
                                             type="text" 
                                             value={profileData.full_name}
                                             onChange={(e) => setProfileData({...profileData, full_name: e.target.value})}
-                                            className="px-6 py-4 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-3xl focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
+                                            className="px-6 py-4 md:py-5 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-2xl md:rounded-3xl focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
                                             placeholder="John Doe"
                                         />
                                     </div>
                                     <div className="flex flex-col gap-3">
-                                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Username</label>
+                                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Username</label>
                                         <input 
                                             type="text" 
                                             value={profileData.username}
                                             onChange={(e) => setProfileData({...profileData, username: e.target.value})}
-                                            className="px-6 py-4 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-3xl focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
+                                            className="px-6 py-4 md:py-5 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-2xl md:rounded-3xl focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
                                             placeholder="@johndoe"
                                         />
                                     </div>
                                     <div className="flex flex-col gap-3 md:col-span-2">
-                                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Bio</label>
+                                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Bio</label>
                                         <textarea 
                                             rows={3}
                                             value={profileData.bio}
                                             onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
-                                            className="px-6 py-4 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-[32px] focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm resize-none"
+                                            className="px-6 py-4 md:py-5 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-2xl md:rounded-[32px] focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm resize-none"
                                             placeholder="Tell us about yourself..."
                                         />
                                     </div>
@@ -237,7 +230,7 @@ const AccountPage = () => {
 
                                 <button 
                                     disabled={isLoading}
-                                    className="w-full md:w-fit px-10 py-4 bg-charcoal dark:bg-primary text-white rounded-[24px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl hover:shadow-primary/30 disabled:opacity-50"
+                                    className="w-full md:w-fit px-10 py-4.5 md:py-5 bg-charcoal dark:bg-primary text-white rounded-[24px] md:rounded-[32px] font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl hover:shadow-primary/30 disabled:opacity-50"
                                 >
                                     {isLoading ? <RefreshCcw className="animate-spin" size={18} /> : <Save size={18} />}
                                     Save Profile Changes
@@ -249,45 +242,45 @@ const AccountPage = () => {
 
                 {activeTab === 'security' && (
                     <div className="lg:col-span-8 flex flex-col gap-8">
-                        <div className="p-8 bg-white dark:bg-gray-900/50 rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-xl shadow-charcoal/5 relative overflow-hidden group">
+                        <div className="p-5 md:p-10 bg-white dark:bg-gray-900/50 rounded-[32px] md:rounded-[48px] border border-gray-100 dark:border-gray-800 shadow-xl shadow-charcoal/5 relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 -mr-32 -mt-32 rounded-full blur-3xl" />
                             
-                            <form onSubmit={handlePasswordSubmit} className="relative flex flex-col gap-8">
-                                <h3 className="text-xl font-black text-charcoal dark:text-white uppercase font-display">Change Password</h3>
+                            <form onSubmit={handlePasswordSubmit} className="relative flex flex-col gap-8 md:gap-10">
+                                <h3 className="text-xl md:text-2xl font-black text-charcoal dark:text-white uppercase font-display leading-none">Change Password</h3>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                                     <div className="flex flex-col gap-3 md:col-span-2">
-                                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Current Password</label>
+                                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Current Password</label>
                                         <input 
                                             type="password" 
                                             value={passwordData.current_password}
                                             onChange={(e) => setPasswordData({...passwordData, current_password: e.target.value})}
-                                            className="px-6 py-4 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-3xl focus:border-primary30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
+                                            className="px-6 py-4 md:py-5 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-2xl md:rounded-3xl focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
                                         />
                                     </div>
                                     <div className="flex flex-col gap-3">
-                                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">New Password</label>
+                                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">New Password</label>
                                         <input 
                                             type="password" 
                                             value={passwordData.new_password}
                                             onChange={(e) => setPasswordData({...passwordData, new_password: e.target.value})}
-                                            className="px-6 py-4 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-3xl focus:border-primary30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
+                                            className="px-6 py-4 md:py-5 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-2xl md:rounded-3xl focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
                                         />
                                     </div>
                                     <div className="flex flex-col gap-3">
-                                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Confirm New Password</label>
+                                        <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Confirm New Password</label>
                                         <input 
                                             type="password" 
                                             value={passwordData.confirm_password}
                                             onChange={(e) => setPasswordData({...passwordData, confirm_password: e.target.value})}
-                                            className="px-6 py-4 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-3xl focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
+                                            className="px-6 py-4 md:py-5 bg-[#F9F9FB] dark:bg-gray-800/50 border border-transparent dark:border-gray-800 rounded-2xl md:rounded-3xl focus:border-primary/30 focus:ring-0 focus:bg-white dark:focus:bg-gray-800 transition-all font-bold text-charcoal dark:text-white text-sm"
                                         />
                                     </div>
                                 </div>
 
                                 <button 
                                     disabled={isLoading}
-                                    className="w-full md:w-fit px-10 py-4 bg-charcoal dark:bg-primary text-white rounded-[24px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full md:w-fit px-10 py-4.5 md:py-5 bg-charcoal dark:bg-primary text-white rounded-[24px] md:rounded-[32px] font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 hover:scale-[1.03] active:scale-95 transition-all shadow-2xl hover:shadow-primary/30 disabled:opacity-50"
                                 >
                                     {isLoading ? (
                                         <>
@@ -305,16 +298,16 @@ const AccountPage = () => {
                         </div>
 
                         {/* Danger Zone */}
-                        <div className="p-8 bg-red-50 dark:bg-red-900/10 rounded-[40px] border border-red-100 dark:border-red-900/50 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="p-6 md:p-10 bg-red-50 dark:bg-red-900/10 rounded-[32px] md:rounded-[48px] border border-red-100 dark:border-red-900/50 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
                             <div className="flex flex-col gap-1">
-                                <h4 className="text-red-900 dark:text-red-400 font-black uppercase text-sm tracking-wider">Delete Account</h4>
-                                <p className="text-xs font-bold text-red-900/60 dark:text-red-400/60 leading-relaxed max-w-sm">
+                                <h4 className="text-red-900 dark:text-red-400 font-black uppercase text-xs md:text-sm tracking-wider">Delete Account</h4>
+                                <p className="text-[10px] md:text-xs font-bold text-red-900/60 dark:text-red-400/60 leading-relaxed max-w-sm">
                                     Permanently delete your account and all associated projects. This action cannot be undone.
                                 </p>
                             </div>
                             <button 
                                 onClick={() => showComingSoonToast('Account Deletion')}
-                                className="px-8 py-3.5 bg-red-600 text-white rounded-[20px] font-black uppercase tracking-widest text-[10px] hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 active:scale-95 whitespace-nowrap"
+                                className="w-full md:w-fit px-8 py-3.5 md:py-4 bg-red-600 text-white rounded-[20px] md:rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 active:scale-95 whitespace-nowrap"
                             >
                                 Delete Account
                             </button>
@@ -326,11 +319,11 @@ const AccountPage = () => {
                     <div className="lg:col-span-8 flex flex-col gap-8">
                         <div className="flex flex-col gap-6">
                             <div className="flex items-center justify-between px-2">
-                                <h3 className="text-xl font-black text-charcoal dark:text-white uppercase font-display">Active Sessions</h3>
+                                <h3 className="text-xl md:text-2xl font-black text-charcoal dark:text-white uppercase font-display leading-none">Active Sessions</h3>
                                 <button 
                                     onClick={() => /** @type {any} */ (dispatch)(fetchSessionsAsync())}
                                     disabled={isSessionsLoading}
-                                    className="p-3 bg-[#F9F9FB] dark:bg-gray-800/50 text-gray-500 hover:text-primary rounded-2xl transition-all border border-transparent dark:border-gray-800 disabled:opacity-50"
+                                    className="p-3 bg-white dark:bg-gray-800/50 text-gray-400 hover:text-primary rounded-xl md:rounded-2xl transition-all border border-gray-100 dark:border-gray-800 disabled:opacity-50 shadow-sm"
                                 >
                                     <RefreshCcw size={18} className={isSessionsLoading ? 'animate-spin' : ''} />
                                 </button>
@@ -341,30 +334,30 @@ const AccountPage = () => {
                                     sessions.map((/** @type {any} */ session) => (
                                         <div 
                                             key={session.id}
-                                            className="p-6 bg-white dark:bg-gray-900/50 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-lg shadow-charcoal/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group hover:border-primary/20 transition-all"
+                                            className="p-5 md:p-8 bg-white dark:bg-gray-900/50 rounded-[28px] md:rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-lg shadow-charcoal/5 flex flex-col sm:flex-row items-center justify-between gap-6 group hover:border-primary/20 transition-all text-center sm:text-left"
                                         >
-                                            <div className="flex items-center gap-6">
-                                                <div className="w-14 h-14 bg-primary/10 text-primary rounded-[22px] flex items-center justify-center p-3">
-                                                    <Smartphone size={24} />
+                                            <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-8">
+                                                <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 text-primary rounded-[20px] md:rounded-[28px] flex items-center justify-center shrink-0">
+                                                    <Smartphone className="w-6 h-6 md:w-7 md:h-7" />
                                                 </div>
-                                                <div className="flex flex-col gap-1">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="font-black text-charcoal dark:text-white text-sm uppercase tracking-tight">
+                                                <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+                                                    <div className="flex items-center justify-center sm:justify-start gap-2.5 min-w-0">
+                                                        <span className="font-black text-charcoal dark:text-white text-xs md:text-sm uppercase tracking-tight truncate max-w-[200px] sm:max-w-[300px] lg:max-w-[450px]">
                                                             {session.device_info || session.user_agent || 'Unknown Device'}
                                                         </span>
                                                         {session.isCurrent && (
-                                                            <span className="px-2 py-0.5 bg-green-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full">Current</span>
+                                                            <span className="px-2 py-0.5 bg-green-500 text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest rounded-full">Current</span>
                                                         )}
                                                     </div>
-                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                        {session.ip_address} • Last active {new Date(session.last_active_at || session.created_at).toLocaleString()}
+                                                    <span className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-70">
+                                                        {session.ip_address} • Last {new Date(session.last_active_at || session.created_at).toLocaleString()}
                                                     </span>
                                                 </div>
                                             </div>
                                             {!session.isCurrent && (
                                                 <button 
                                                     onClick={() => handleRevokeSession(session.id)}
-                                                    className="flex items-center gap-2 text-xs font-black text-red-500 uppercase tracking-widest hover:bg-red-50 dark:hover:bg-red-500/10 px-4 py-2 rounded-xl transition-all"
+                                                    className="w-full sm:w-auto flex items-center justify-center gap-2 text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-50 dark:hover:bg-red-500/10 px-6 py-3 rounded-xl transition-all"
                                                 >
                                                     <XCircle size={14} />
                                                     Terminate
@@ -373,7 +366,7 @@ const AccountPage = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="p-16 bg-[#F9F9FB]/50 dark:bg-gray-900/20 rounded-[40px] border-2 border-dashed border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center gap-6 animate-in fade-in zoom-in-95 duration-500">
+                                    <div className="p-16 bg-gray-50/50 dark:bg-gray-900/20 rounded-[40px] border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center gap-6 animate-in fade-in zoom-in-95 duration-500">
                                         <div className="w-20 h-20 bg-white dark:bg-gray-800 shadow-xl rounded-full flex items-center justify-center text-gray-300 dark:text-gray-600">
                                             <Smartphone size={32} strokeWidth={1.5} />
                                         </div>
@@ -390,8 +383,8 @@ const AccountPage = () => {
                     </div>
                 )}
 
-                {/* Info Sidebar (visible on desktop) */}
-                <div className="lg:col-span-4 flex flex-col gap-8 sticky top-52">
+                {/* Info Sidebar (only on desktop) */}
+                <div className="hidden lg:flex lg:col-span-4 flex-col gap-8 sticky top-52">
                     <div className="p-8 bg-charcoal dark:bg-primary text-white rounded-[40px] shadow-2xl shadow-primary/20 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 -mr-16 -mt-16 rounded-full blur-2xl" />
                         

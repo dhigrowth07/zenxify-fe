@@ -48,7 +48,7 @@ const SidebarItem = ({ icon: Icon, label, href, active, isCollapsed, subItems = 
     return (
         <div className="flex flex-col">
             <Link
-                to={subItems ? '#' : href}
+                to={subItems?.length > 0 ? '#' : href}
                 onClick={handleToggle}
                 className={`flex items-center gap-3 relative transition-all group ${isCollapsed ? 'justify-center px-0 py-4' : 'px-8 py-3.5'
                     } ${active || (subItems && subItems.some(sub => location.pathname === sub.href))
@@ -326,7 +326,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
                         <>
                             <div className="flex flex-col flex-1 min-w-0 pr-1 ml-3 text-left">
                                 <span className="text-[13px] font-black text-charcoal dark:text-gray-100 truncate font-display tracking-tight leading-none mb-0.5">
-                                    {user?.full_name?.split(' ')[0] || 'Elena'} R
+                                    {user?.full_name?.split(' ')[0] || 'Unknown'}
                                 </span>
                                 <span className="text-[10px] text-gray-500 uppercase tracking-widest font-black opacity-80">
                                     {user?.plan || 'Free Plan'}
