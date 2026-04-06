@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Bell, Zap } from 'lucide-react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Sidebar from '../components/shared/Sidebar';
+// ... rest of imports (simulated)
 import NotificationPanel from '../components/shared/NotificationPanel';
 import { 
     fetchNotificationsAsync, 
@@ -106,10 +107,13 @@ const DashboardLayout = () => {
                             )}
                         </div>
 
-                        <button className="flex items-center gap-3 px-8 py-3.5 bg-charcoal dark:bg-primary text-white rounded-[20px] font-black uppercase tracking-widest text-xs hover:scale-[1.03] active:scale-95 transition-all shadow-xl hover:shadow-primary/30">
+                        <Link 
+                            to="/settings/billing?tab=plans"
+                            className="flex items-center gap-3 px-8 py-3.5 bg-charcoal dark:bg-primary text-white rounded-[20px] font-black uppercase tracking-widest text-xs hover:scale-[1.03] active:scale-95 transition-all shadow-xl hover:shadow-primary/30"
+                        >
                             <Zap size={16} fill="currentColor" strokeWidth={0} />
                             Upgrade
-                        </button>
+                        </Link>
                     </div>
                 </header>
 

@@ -11,37 +11,52 @@ import ForgotPasswordPage from './pages/authpages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/authpages/ResetPasswordPage';
 import EmailVerificationPage from './pages/authpages/EmailVerificationPage';
 import DashboardLayout from './layouts/DashboardLayout';
+import VideoEditorLayout from './layouts/VideoEditorLayout';
 import DashboardPage from './pages/DashboardPage';
 import AccountPage from './pages/settings/AccountPage';
 import GeneralPage from './pages/settings/GeneralPage';
+import ProjectCreationPage from './pages/videoediting_pages/ProjectCreationPage';
+import VideoUploadPage from './pages/videoediting_pages/VideoUploadPage';
+import ProjectListingPage from './pages/videoediting_pages/ProjectListingPage';
+import BillingPage from './pages/settings/BillingPage';
 
 const Router = () => {
-  return (
-    <Suspense fallback={<Loading />}>
-      <ScrollToTop />
+    return (
+        <Suspense fallback={<Loading />}>
+            <ScrollToTop />
 
-      <Routes>
-        <Route index element={<HomePage />} />
-        <Route element={<PublicRoute />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/verify-email" element={<EmailVerificationPage />} />
-        </Route>
+            <Routes>
+                <Route index element={<HomePage />} />
+                <Route element={<PublicRoute />}>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/verify-email" element={<EmailVerificationPage />} />
+                </Route>
 
-        <Route element={<ProtectedRoute />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/settings/account" element={<AccountPage />} />
-            <Route path="/settings/general" element={<GeneralPage />} />
-          </Route>
-        </Route>
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<DashboardLayout />}>
+                        <Route path="/dashboard" element={<DashboardPage />} />
+                        <Route path="/projects" element={<ProjectListingPage />} />
+                        <Route path="/video-editor/create" element={<ProjectCreationPage />} />
 
-        <Route path='*' element={<h1>404 Not Found</h1>} />
-      </Routes>
-    </Suspense>
-  );
+                        {/* Video Editor Workflow Routes */}
+                        <Route element={<VideoEditorLayout />}>
+                            <Route path="/video-editor/upload" element={<VideoUploadPage />} />
+                            {/* Other editing steps would go here */}
+                        </Route>
+
+                        <Route path="/settings/account" element={<AccountPage />} />
+                        <Route path="/settings/general" element={<GeneralPage />} />
+                        <Route path="/settings/billing" element={<BillingPage />} />
+                    </Route>
+                </Route>
+
+                <Route path="*" element={<h1>404 Not Found</h1>} />
+            </Routes>
+        </Suspense>
+    );
 };
 
 

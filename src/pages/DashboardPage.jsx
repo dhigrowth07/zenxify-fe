@@ -199,7 +199,12 @@ const DashboardPage = () => {
                         </div>
                         <div className="flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest pt-1 px-1">
                             <span>Purchased: {stats?.credits?.purchased || 0}</span>
-                            <button className="text-primary hover:underline">Top Up</button>
+                            <button 
+                                onClick={() => navigate('/settings/billing?tab=topups')}
+                                className="text-primary hover:underline"
+                            >
+                                Top Up
+                            </button>
                         </div>
                     </div>
                 </StatCard>
@@ -251,7 +256,7 @@ const DashboardPage = () => {
                             {...action} 
                             onClick={() => {
                                 if (action.title === 'Video editing') {
-                                    navigate('/video-editor');
+                                    navigate('/video-editor/create');
                                 } else {
                                     toast.warning("Feature Coming Soon!", "This feature will be available in a future update.");
                                 }

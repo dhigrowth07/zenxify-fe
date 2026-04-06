@@ -107,12 +107,6 @@ const SidebarItem = ({ icon: Icon, label, href, active, isCollapsed, subItems = 
                             <Link
                                 key={sub.label}
                                 to={sub.href}
-                                onClick={(e) => {
-                                    if (sub.label === 'Billing') {
-                                        e.preventDefault();
-                                        showComingSoonToast(sub.label);
-                                    }
-                                }}
                                 className={`text-[12px] font-black uppercase tracking-widest text-left transition-all hover:text-primary ${location.pathname === sub.href ? 'text-primary' : 'text-gray-400 opacity-60 hover:opacity-100 font-bold'
                                     }`}
                             >
@@ -136,8 +130,9 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
 
     const navItems = [
         { icon: Home, label: 'Home', href: '/dashboard' },
+        { icon: Folder, label: 'Projects', href: '/projects' },
         { icon: LayoutGrid, label: 'Templates', href: '/templates' },
-        { icon: Folder, label: 'Assets', href: '/assets' },
+        { icon: Activity, label: 'Assets', href: '/assets' },
         { icon: Sparkles, label: 'AI Tools', href: '/ai-tools' },
         {
             icon: Settings,
@@ -273,13 +268,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
                                     {index === 1 && <div className="h-px bg-gray-50 dark:bg-gray-800/50 my-1 mx-2" />}
                                     <Link
                                         to={item.href}
-                                        onClick={(e) => {
-                                            setIsMenuOpen(false);
-                                            if (!['Account', 'Settings', 'General', 'Upgrade (Pro)'].includes(item.label)) {
-                                                e.preventDefault();
-                                                showComingSoonToast(item.label);
-                                            }
-                                        }}
+                                        onClick={() => setIsMenuOpen(false)}
                                         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-xs font-black uppercase tracking-wider group ${item.color === 'primary'
                                                 ? 'hover:bg-primary/5 text-gray-600 dark:text-gray-400 hover:text-primary'
                                                 : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-600 dark:text-gray-400'
