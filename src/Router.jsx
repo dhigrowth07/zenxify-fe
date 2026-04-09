@@ -19,6 +19,7 @@ import ProjectCreationPage from './pages/videoediting_pages/ProjectCreationPage'
 import VideoUploadPage from './pages/videoediting_pages/VideoUploadPage';
 import ProjectListingPage from './pages/videoediting_pages/ProjectListingPage';
 import BillingPage from './pages/settings/BillingPage';
+import ColourGradePage from './pages/videoediting_pages/ColourGradePage';
 
 const Router = () => {
     return (
@@ -44,6 +45,7 @@ const Router = () => {
                         {/* Video Editor Workflow Routes */}
                         <Route element={<VideoEditorLayout />}>
                             <Route path="/video-editor/upload" element={<VideoUploadPage />} />
+                            <Route path="/video-editor/grade" element={<ColourGradePage />} />
                             {/* Other editing steps would go here */}
                         </Route>
 

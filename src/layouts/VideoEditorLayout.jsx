@@ -23,13 +23,12 @@ const VideoEditorLayout = () => {
                     const isActive = location.pathname === step.route;
                     // In a real app, you'd also check if a step is "completed" based on project state
                     return (
-                        <div 
+                        <div
                             key={step.name}
-                            className={`px-6 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-default ${
-                                isActive 
-                                    ? 'bg-brand-gradient text-white shadow-lg shadow-primary/20' 
+                            className={`px-6 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-default ${isActive
+                                    ? 'bg-brand-gradient text-white shadow-lg shadow-primary/20'
                                     : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
-                            }`}
+                                }`}
                         >
                             {step.name}
                         </div>
