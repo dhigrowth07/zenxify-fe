@@ -5,16 +5,15 @@ Corrections applied: all 5 fixes from review
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STEP 1 — EDITOR JSON SCHEMA (UNCHANGED — CORRECT)
+STEP 1 — EDITOR JSON SCHEMA (UPDATED)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-File: src/store/editorSchema.js
+File: src/redux/editor/editorSchema.js
 
 export const defaultEditorState = {
 
   trim: {
     segments: []
-    // { start: 0.0, end: 4.2 }
   },
 
   color: {
@@ -29,23 +28,17 @@ export const defaultEditorState = {
     whites:      0,
     blacks:      0,
     clarity:     0,
-    hue:         0
+    hue:         0,
+    hsl: {           ← ADDED for Color Wheel UI stability
+      hue: 0, 
+      saturation: 0, 
+      luminance: 0 
+    }
   },
 
   captions: [],
-  // { id, text, start, end, style, position, color, fontSize }
-
   broll: [],
-  // { id, src, start, end, layout, position: { x, y, w, h } }
-
-  // FIX 5: transitions reference segment index, not timecode
   transitions: [],
-  // {
-  //   id,
-  //   between: 1,         ← index: between segment[1] and segment[2]
-  //   type: "fade" | "zoom" | "slide" | "blur",
-  //   duration: 0.3       ← seconds
-  // }
 
   audio: {
     bgm:    null,
@@ -56,35 +49,43 @@ export const defaultEditorState = {
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-STEP 2 — REDUX EDITOR SLICE (UNCHANGED — CORRECT)
+STEP 2 — REDUX EDITOR SLICE (UPDATED)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-File: src/store/slices/editorSlice.js
+File: src/redux/editor/editorSlice.js
 
 import { createSlice } from "@reduxjs/toolkit"
-import { defaultEditorState } from "../editorSchema"
+import { defaultEditorState } from "./editorSchema"
 
 const editorSlice = createSlice({
   name: "editor",
 
   initialState: {
-    editor:    defaultEditorState,
-    projectId: null,
-    isDirty:   false,
+    editor:      defaultEditorState,
+    projectId:   null,
+    isDirty:     false,
     previewTime: 0,
-    isPlaying:   false
+    isPlaying:   false,
+    isLoading:   false,
+    error:       null
   },
 
   reducers: {
 
     loadProject: (state, action) => {
-      state.editor    = action.payload.editor || defaultEditorState
+      state.editor    = { ...defaultEditorState, ...action.payload.editor }
       state.projectId = action.payload.projectId
       state.isDirty   = false
     },
 
     setColor: (state, action) => {
       state.editor.color = { ...state.editor.color, ...action.payload }
+      state.isDirty = true
+    },
+
+    // ADDED for HSL dynamic wheel adjustments
+    setHsl: (state, action) => {
+      state.editor.color.hsl = { ...state.editor.color.hsl, ...action.payload }
       state.isDirty = true
     },
 
@@ -97,6 +98,14 @@ const editorSlice = createSlice({
       state.editor.captions = action.payload
       state.isDirty = true
     },
+    
+    // ... other setters ...
+
+    markSaved: (state) => {
+      state.isDirty = false
+    }
+  }
+})
 
     setBroll: (state, action) => {
       state.editor.broll = action.payload

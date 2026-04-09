@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Monitor,
   SkipBack,
@@ -17,6 +18,13 @@ import { cn } from '../../lib/utils';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { getProject } from '../../services/projectServices';
 import VideoPreview from '../../components/shared/VideoPreview';
+import {
+  loadProject,
+  setColor,
+  setHsl
+} from '../../redux/editor/editorSlice';
+import { API_URL } from '../../config/envConfig';
+import { useAutoSave } from '../../hooks/useAutoSave';
 
 const COLOR_PRESETS = [
   {
@@ -95,24 +103,19 @@ const COLOR_PRESETS = [
 
 const ColourGradePage = () => {
   const { id } = useParams();
+  const dispatch = useDispatch();
+
+  // Persistence Hook
+  useAutoSave();
+
+  // Redux State
+  const editorState = useSelector((state) => state.editor.editor);
+  const color = editorState?.color || {};
+  const isSyncing = useSelector((state) => state.editor.isLoading);
+
   const [project, setProject] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [internalLoading, setInternalLoading] = useState(true);
   const [selectedPreset, setSelectedPreset] = useState("none");
-  const [color, setColor] = useState({
-    exposure: 0,
-    contrast: 1,
-    highlights: 0,
-    shadows: 0,
-    whites: 0,
-    blacks: 0,
-    saturation: 1,
-    vibrance: 0,
-    clarity: 0,
-    temperature: 0,
-    tint: 0,
-    hue: 0,
-    hsl: { hue: 0, saturation: 0, luminance: 0 }
-  });
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -121,26 +124,32 @@ const ColourGradePage = () => {
         const res = await getProject(id);
         if (res?.data) {
           setProject(res.data);
+          dispatch(loadProject({
+            projectId: id,
+            editor: res.data.editor_json || {},
+            sourceUrl: res.data.video_url?.startsWith('http')
+              ? res.data.video_url
+              : `${API_URL}${res.data.video_url}`
+          }));
         }
       } catch (err) {
         console.error("Failed to fetch project:", err);
       } finally {
-        setTimeout(() => setLoading(false), 800);
+        setInternalLoading(false);
       }
     };
     fetchProjectData();
-  }, [id]);
+  }, [id, dispatch]);
 
-  /**
-   * @param {any} preset 
-   */
+  /** @param {any} preset */
   const applyPreset = (preset) => {
     setSelectedPreset(preset.id);
-    setColor(prev => ({
-      ...prev,
+    // Merge preset color with existing HSL to prevent resetting wheel adjustments
+    const newColor = {
       ...preset.color,
-      hsl: { ...prev.hsl }
-    }));
+      hsl: color.hsl || { hue: 0, saturation: 0, luminance: 0 }
+    };
+    dispatch(setColor(newColor));
   };
 
   /**
@@ -148,7 +157,7 @@ const ColourGradePage = () => {
    * @param {number} val 
    */
   const updateColor = (key, val) => {
-    setColor(prev => ({ ...prev, [key]: val }));
+    dispatch(setColor({ [key]: val }));
     setSelectedPreset("custom");
   };
 
@@ -157,15 +166,15 @@ const ColourGradePage = () => {
    * @param {number} val 
    */
   const updateHsl = (key, val) => {
-    setColor(prev => ({
-      ...prev,
-      hsl: { ...prev.hsl, [key]: val }
-    }));
+    dispatch(setHsl({ [key]: val }));
   };
 
-  const wheelColor = parseColor(`hsl(${color.hsl.hue}, ${color.hsl.saturation}%, 50%)`);
+  const wheelColor = parseColor(`hsl(${color?.hsl?.hue || 0}, ${color?.hsl?.saturation || 0}%, 50%)`);
 
-  if (loading) {
+  // Unify loading detection
+  const isPageLoading = internalLoading || isSyncing;
+
+  if (isPageLoading) {
     return (
       <div className="grid grid-cols-12 gap-4 items-stretch">
         <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
@@ -294,7 +303,7 @@ const ColourGradePage = () => {
                   <div
                     className="w-[80px] h-[80px] bg-white rounded-full flex items-center justify-center shadow-md transition-colors"
                     style={{
-                      backgroundColor: `hsl(${color.hsl.hue}, ${color.hsl.saturation}%, ${(color.hsl.luminance / 2) + 50}%)`
+                      backgroundColor: `hsl(${color?.hsl?.hue || 0}, ${color?.hsl?.saturation || 0}%, ${(color?.hsl?.luminance / 2 || 0) + 50}%)`
                     }}
                   >
                     <div className="w-[85%] h-[85%] rounded-full relative shadow-inner flex items-center justify-center mix-blend-overlay">
@@ -307,7 +316,7 @@ const ColourGradePage = () => {
                 <div className="space-y-2.5">
                   <Slider
                     label="Hue"
-                    value={color.hsl.hue}
+                    value={color?.hsl?.hue || 0}
                     min={0} max={360}
                     step={1}
                     trackClass="bg-gradient-to-r from-red-500 via-yellow-400 via-green-500 via-cyan-400 via-blue-500 via-purple-500 to-red-500"
@@ -315,7 +324,7 @@ const ColourGradePage = () => {
                   />
                   <Slider
                     label="Saturation"
-                    value={color.hsl.saturation}
+                    value={color?.hsl?.saturation || 0}
                     min={0} max={100}
                     step={1}
                     trackClass="bg-gradient-to-r from-[#5D4037] to-[#8D6E63]"
@@ -323,7 +332,7 @@ const ColourGradePage = () => {
                   />
                   <Slider
                     label="Luminance"
-                    value={color.hsl.luminance}
+                    value={color?.hsl?.luminance || 0}
                     min={-100} max={100}
                     step={1}
                     trackClass="bg-gradient-to-r from-[#424242] via-[#FDD835] to-[#FFFFFF]"
@@ -364,7 +373,6 @@ const ColourGradePage = () => {
         {/* Right Column (Preview & Action) */}
         <VideoPreview
           project={project}
-          color={color}
           className="col-span-12 lg:col-span-3 order-1 lg:order-3"
           actionButton={
             <button className="w-full py-3.5 rounded-xl bg-brand-gradient text-white font-bold text-lg shadow-lg hover:opacity-90 active:scale-[0.98] transition-all">
@@ -377,19 +385,20 @@ const ColourGradePage = () => {
   );
 };
 
-const Slider = ({ label, value, min = -100, max = 100, step = 1, onChange, trackClass, isFloating = false }) => {
+const Slider = ({ label, value = 0, min = -100, max = 100, step = 1, onChange, trackClass, isFloating = false }) => {
+  const safeValue = typeof value === 'number' ? value : 0;
   const isDecimal = (step && step < 1) || isFloating;
-  const percentage = ((value - min) / (max - min)) * 100;
+  const percentage = ((safeValue - min) / (max - min)) * 100;
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between items-center text-xs font-bold text-charcoal">
         <span>{label}</span>
-        <span className="font-mono opacity-80">{value > 0 ? '+' : ''}{isDecimal ? value.toFixed(2) : value}</span>
+        <span className="font-mono opacity-80">{safeValue > 0 ? '+' : ''}{isDecimal ? safeValue.toFixed(2) : safeValue}</span>
       </div>
       <div className="relative h-2 w-full flex items-center">
         <div className="absolute inset-0 rounded-full bg-[#E5E7EB]" />
         <div className={cn("absolute inset-y-0 left-0 rounded-full", trackClass)} style={{ width: `${percentage}%` }} />
-        <input type="range" min={min} max={max} step={step || (isFloating ? 0.01 : 1)} value={value} onChange={(e) => onChange(parseFloat(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+        <input type="range" min={min} max={max} step={step || (isFloating ? 0.01 : 1)} value={safeValue} onChange={(e) => onChange(parseFloat(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
         <div className="absolute w-5 h-5 bg-white rounded-full shadow-md border-2 border-white pointer-events-none transition-transform" style={{ left: `calc(${percentage}% - 10px)` }} />
       </div>
     </div>

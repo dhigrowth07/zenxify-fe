@@ -23,6 +23,10 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       "process.env.NODE_ENV": JSON.stringify(mode),
+      global: 'window',
+    },
+    optimizeDeps: {
+      include: ['gl-react', 'gl-react-dom']
     },
     build: {
       minify: 'terser',

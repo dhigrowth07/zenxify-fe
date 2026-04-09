@@ -6,12 +6,13 @@ import profileReducer from "./profile/profileSlice";
 import notificationReducer from "./notifications/notificationSlice";
 import projectReducer from "./projects/projectSlice";
 import billingReducer from "./billing/billingSlice";
+import editorReducer from "./editor/editorSlice";
 
 const rootPersistConfig = {
   key: "root",
   version: 1,
   storage,
-  blacklist: ["auth", "profile", "notifications", "billing"], 
+  blacklist: ["auth", "profile", "notifications", "billing", "editor"], 
 };
 
 const authPersistConfig = {
@@ -44,6 +45,7 @@ const rootReducer = combineReducers({
   notifications: persistReducer(notificationPersistConfig, notificationReducer),
   projects: persistReducer(projectPersistConfig, projectReducer),
   billing: billingReducer,
+  editor: editorReducer,
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);

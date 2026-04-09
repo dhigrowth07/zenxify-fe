@@ -1,3 +1,11 @@
+// --- GL-React Polyfills for Vite ---
+if (typeof window !== "undefined") {
+  window.global = window;
+}
+import { Buffer } from "buffer";
+window.Buffer = Buffer;
+// ------------------------------------
+
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -20,16 +28,14 @@ const FullScreenLoader = () => (
 const rootElement = document.getElementById('root')
 if (rootElement) {
   createRoot(rootElement).render(
-    <StrictMode>
-      <BrowserRouter>
-        <Provider store={store}>
-          <PersistGate loading={<FullScreenLoader />} persistor={persistor}>
-            <ThemeProvider>
-              <App />
-            </ThemeProvider>
-          </PersistGate>
-        </Provider>
-      </BrowserRouter>
-    </StrictMode>
+    <BrowserRouter>
+      <Provider store={store}>
+        <PersistGate loading={<FullScreenLoader />} persistor={persistor}>
+          <ThemeProvider>
+            <App />
+          </ThemeProvider>
+        </PersistGate>
+      </Provider>
+    </BrowserRouter>
   )
 }

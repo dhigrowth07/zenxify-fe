@@ -24,7 +24,12 @@ export const defaultEditorState = {
     whites:      0,    // -100 to 100
     blacks:      0,    // -100 to 100
     clarity:     0,    // -100 to 100
-    hue:         0     // -180 to 180
+    hue:         0,     // -180 to 180
+    hsl: {
+      hue: 0,
+      saturation: 0,
+      luminance: 0
+    }
   },
 
   // Captions: text overlays with simple styling

@@ -16,7 +16,10 @@ const VideoEditorLayout = () => {
     const location = useLocation();
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-6 min-h-screen">
+        // <div className="w-full px-4 lg:px-8 py-6 min-h-screen">
+
+        // <div className="max-w-7xl mx-auto px-4 py-6 min-h-screen">
+        <div className="w-full px-4 lg:px-8 py-6 min-h-screen">
             {/* Horizontal Navigation / Stepper */}
             <div className="flex flex-wrap justify-center gap-2 mb-10 lg:mb-14">
                 {EDITOR_STEPS.map((step) => {
@@ -26,8 +29,8 @@ const VideoEditorLayout = () => {
                         <div
                             key={step.name}
                             className={`px-6 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all cursor-default ${isActive
-                                    ? 'bg-brand-gradient text-white shadow-lg shadow-primary/20'
-                                    : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                                ? 'bg-brand-gradient text-white shadow-lg shadow-primary/20'
+                                : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
                                 }`}
                         >
                             {step.name}
