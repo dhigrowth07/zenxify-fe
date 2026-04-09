@@ -45,7 +45,7 @@ const Router = () => {
                         {/* Video Editor Workflow Routes */}
                         <Route element={<VideoEditorLayout />}>
                             <Route path="/video-editor/upload" element={<VideoUploadPage />} />
-                            <Route path="/video-editor/grade" element={<ColourGradePage />} />
+                             <Route path="/video-editor/grade/:id" element={<ColourGradePage />} />
                             {/* Other editing steps would go here */}
                         </Route>
 

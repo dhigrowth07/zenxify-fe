@@ -1,0 +1,981 @@
+ZENXIFY — COLOR GRADE IMPLEMENTATION PLAN (CORRECTED v2)
+=========================================================
+Stack: React 19 + Redux Toolkit + gl-react + Node.js + Python + FFmpeg
+Corrections applied: all 5 fixes from review
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — EDITOR JSON SCHEMA (UNCHANGED — CORRECT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/store/editorSchema.js
+
+export const defaultEditorState = {
+
+  trim: {
+    segments: []
+    // { start: 0.0, end: 4.2 }
+  },
+
+  color: {
+    exposure:    0,
+    contrast:    1,
+    saturation:  1,
+    vibrance:    0,
+    temperature: 0,
+    tint:        0,
+    highlights:  0,
+    shadows:     0,
+    whites:      0,
+    blacks:      0,
+    clarity:     0,
+    hue:         0
+  },
+
+  captions: [],
+  // { id, text, start, end, style, position, color, fontSize }
+
+  broll: [],
+  // { id, src, start, end, layout, position: { x, y, w, h } }
+
+  // FIX 5: transitions reference segment index, not timecode
+  transitions: [],
+  // {
+  //   id,
+  //   between: 1,         ← index: between segment[1] and segment[2]
+  //   type: "fade" | "zoom" | "slide" | "blur",
+  //   duration: 0.3       ← seconds
+  // }
+
+  audio: {
+    bgm:    null,
+    volume: 1,
+    duck:   true
+  }
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — REDUX EDITOR SLICE (UNCHANGED — CORRECT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/store/slices/editorSlice.js
+
+import { createSlice } from "@reduxjs/toolkit"
+import { defaultEditorState } from "../editorSchema"
+
+const editorSlice = createSlice({
+  name: "editor",
+
+  initialState: {
+    editor:    defaultEditorState,
+    projectId: null,
+    isDirty:   false,
+    previewTime: 0,
+    isPlaying:   false
+  },
+
+  reducers: {
+
+    loadProject: (state, action) => {
+      state.editor    = action.payload.editor || defaultEditorState
+      state.projectId = action.payload.projectId
+      state.isDirty   = false
+    },
+
+    setColor: (state, action) => {
+      state.editor.color = { ...state.editor.color, ...action.payload }
+      state.isDirty = true
+    },
+
+    setTrim: (state, action) => {
+      state.editor.trim = action.payload
+      state.isDirty = true
+    },
+
+    setCaptions: (state, action) => {
+      state.editor.captions = action.payload
+      state.isDirty = true
+    },
+
+    setBroll: (state, action) => {
+      state.editor.broll = action.payload
+      state.isDirty = true
+    },
+
+    setTransitions: (state, action) => {
+      state.editor.transitions = action.payload
+      state.isDirty = true
+    },
+
+    setAudio: (state, action) => {
+      state.editor.audio = { ...state.editor.audio, ...action.payload }
+      state.isDirty = true
+    },
+
+    setPreviewTime: (state, action) => {
+      state.previewTime = action.payload
+    },
+
+    markSaved: (state) => {
+      state.isDirty = false
+    }
+  }
+})
+
+export const {
+  loadProject, setColor, setTrim, setCaptions,
+  setBroll, setTransitions, setAudio,
+  setPreviewTime, markSaved
+} = editorSlice.actions
+
+export default editorSlice.reducer
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3 — AUTO SAVE HOOK (UNCHANGED — CORRECT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/hooks/useAutoSave.js
+
+import { useEffect, useRef } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { markSaved } from "../store/slices/editorSlice"
+import api from "../services/api"
+
+export function useAutoSave() {
+  const dispatch  = useDispatch()
+  const editor    = useSelector(s => s.editor.editor)
+  const projectId = useSelector(s => s.editor.projectId)
+  const isDirty   = useSelector(s => s.editor.isDirty)
+  const timer     = useRef(null)
+
+  useEffect(() => {
+    if (!isDirty || !projectId) return
+    clearTimeout(timer.current)
+    timer.current = setTimeout(async () => {
+      try {
+        await api.patch(`/projects/${projectId}`, { editor })
+        dispatch(markSaved())
+      } catch (err) {
+        console.error("Auto save failed", err)
+      }
+    }, 1500)
+    return () => clearTimeout(timer.current)
+  }, [editor, isDirty, projectId])
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4 — INSTALL PACKAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+npm install gl-react gl-react-dom
+npm install framer-motion
+npm install gsap
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 5 — COLOR GRADE SHADER (FIX 2 APPLIED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/editor/shaders/colorGradeShader.js
+
+FIX 2: clarity now samples neighbor pixels correctly
+       old version sampled same UV — did nothing
+
+import { Shaders, GLSL } from "gl-react"
+
+export const colorGradeShaders = Shaders.create({
+  grade: {
+    frag: GLSL`
+      precision highp float;
+      varying vec2 uv;
+      uniform sampler2D t;
+
+      uniform float u_exposure;
+      uniform float u_contrast;
+      uniform float u_saturation;
+      uniform float u_vibrance;
+      uniform float u_temperature;
+      uniform float u_tint;
+      uniform float u_highlights;
+      uniform float u_shadows;
+      uniform float u_whites;
+      uniform float u_blacks;
+      uniform float u_clarity;
+      uniform float u_hue;
+
+      vec3 applyHue(vec3 col, float hueShift) {
+        float angle = hueShift * 3.14159265 / 180.0;
+        float s = sin(angle);
+        float c = cos(angle);
+        vec3 k = vec3(0.577350269);
+        return col * c + cross(k, col) * s + k * dot(k, col) * (1.0 - c);
+      }
+
+      void main() {
+        vec4 color = texture2D(t, uv);
+
+        // --- exposure ---
+        color.rgb *= pow(2.0, u_exposure);
+
+        // --- contrast ---
+        color.rgb = (color.rgb - 0.5) * u_contrast + 0.5;
+
+        // --- highlights / shadows (tone region masks) ---
+        float luma = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+        float highlightMask = smoothstep(0.5, 1.0, luma);
+        float shadowMask    = smoothstep(0.5, 0.0, luma);
+        color.rgb += highlightMask * (u_highlights / 100.0) * 0.3;
+        color.rgb += shadowMask    * (u_shadows    / 100.0) * 0.3;
+
+        // --- whites / blacks (endpoint adjustment) ---
+        color.rgb += (u_whites / 100.0) * 0.1 * step(0.8, color.rgb);
+        color.rgb += (u_blacks / 100.0) * 0.1 * (1.0 - step(0.2, color.rgb));
+
+        // --- saturation ---
+        float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+        color.rgb  = mix(vec3(gray), color.rgb, u_saturation);
+
+        // --- vibrance (boost low-saturation areas more) ---
+        float sat = max(color.r, max(color.g, color.b))
+                  - min(color.r, min(color.g, color.b));
+        float vib = (1.0 - sat) * u_vibrance;
+        gray      = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+        color.rgb = mix(vec3(gray), color.rgb, 1.0 + vib);
+
+        // --- temperature ---
+        color.r += u_temperature / 100.0 * 0.1;
+        color.b -= u_temperature / 100.0 * 0.1;
+
+        // --- tint ---
+        color.g += u_tint / 100.0 * 0.1;
+
+        // --- clarity (FIX 2: correct neighbor sampling) ---
+        // Sample 4 neighbors to create a real blur, then sharpen
+        vec2 offset = vec2(1.0 / 1920.0, 1.0 / 1080.0);
+        vec3 blur =
+          texture2D(t, uv + offset).rgb +
+          texture2D(t, uv - offset).rgb +
+          texture2D(t, uv + vec2( offset.x, -offset.y)).rgb +
+          texture2D(t, uv + vec2(-offset.x,  offset.y)).rgb;
+        blur *= 0.25;
+        color.rgb += (color.rgb - blur) * (u_clarity / 100.0);
+
+        // --- hue rotation ---
+        color.rgb = applyHue(color.rgb, u_hue);
+
+        // --- clamp ---
+        color.rgb = clamp(color.rgb, 0.0, 1.0);
+
+        gl_FragColor = color;
+      }
+    `
+  }
+})
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 6 — COLOR GRADE LAYER (UNCHANGED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/editor/layers/ColorGradeLayer.jsx
+
+import React from "react"
+import { Node } from "gl-react"
+import { colorGradeShaders } from "../shaders/colorGradeShader"
+
+export default function ColorGradeLayer({ children, color }) {
+  return (
+    <Node
+      shader={colorGradeShaders.grade}
+      uniforms={{
+        t:             children,
+        u_exposure:    color.exposure,
+        u_contrast:    color.contrast,
+        u_saturation:  color.saturation,
+        u_vibrance:    color.vibrance,
+        u_temperature: color.temperature,
+        u_tint:        color.tint,
+        u_highlights:  color.highlights,
+        u_shadows:     color.shadows,
+        u_whites:      color.whites,
+        u_blacks:      color.blacks,
+        u_clarity:     color.clarity,
+        u_hue:         color.hue
+      }}
+    />
+  )
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 7 — VIDEO LAYER (FIX 1 APPLIED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/editor/layers/VideoLayer.jsx
+
+FIX 1: added requestAnimationFrame loop
+        without this, gl-react freezes on first frame
+        because it does not know the video is updating
+
+import React, { useEffect, useState } from "react"
+import { Node, Shaders, GLSL } from "gl-react"
+
+const passthrough = Shaders.create({
+  pass: {
+    frag: GLSL`
+      precision highp float;
+      varying vec2 uv;
+      uniform sampler2D t;
+      void main() {
+        gl_FragColor = texture2D(t, uv);
+      }
+    `
+  }
+})
+
+export default function VideoLayer({ videoRef }) {
+  // FIX 1: tick forces gl-react to re-sample the video texture each frame
+  const [, setTick] = useState(0)
+
+  useEffect(() => {
+    let raf
+    const loop = () => {
+      setTick(t => t + 1)
+      raf = requestAnimationFrame(loop)
+    }
+    loop()
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  return (
+    <Node
+      shader={passthrough.pass}
+      uniforms={{ t: () => videoRef.current }}
+    />
+  )
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 8 — PREVIEW ENGINE (FIX 4 APPLIED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/editor/PreviewEngine.jsx
+
+FIX 4: layer order corrected
+        ColorGradeLayer wraps only VideoLayer (inside Surface)
+        BrollLayer and CaptionLayer are HTML overlays outside Surface
+        this prevents captions/broll from being color graded
+
+import React, { useRef } from "react"
+import { Surface } from "gl-react-dom"
+import { useSelector } from "react-redux"
+import ColorGradeLayer from "./layers/ColorGradeLayer"
+import VideoLayer from "./layers/VideoLayer"
+// import CaptionLayer from "./layers/CaptionLayer"   (future)
+// import BrollLayer from "./layers/BrollLayer"        (future)
+
+export default function PreviewEngine({ width = 360, height = 640 }) {
+  const editor     = useSelector(s => s.editor.editor)
+  const previewTime = useSelector(s => s.editor.previewTime)
+  const videoRef   = useRef()
+
+  return (
+    <div style={{ position: "relative", width, height }}>
+
+      {/* Hidden video element — source texture for shader */}
+      <video
+        ref={videoRef}
+        style={{ display: "none" }}
+        src={editor.sourceUrl}
+        crossOrigin="anonymous"
+      />
+
+      {/*
+        LAYER 1 — Video + color grade (inside gl-react Surface)
+        Only VideoLayer is inside ColorGradeLayer.
+        Broll and captions are NOT inside — they must not be graded.
+      */}
+      <Surface width={width} height={height}>
+        <ColorGradeLayer color={editor.color}>
+          <VideoLayer videoRef={videoRef} />
+        </ColorGradeLayer>
+      </Surface>
+
+      {/*
+        LAYER 2 — Broll overlays (HTML, outside Surface)
+        Rendered on top of color-graded video.
+        Not affected by color shader.
+        (future)
+      */}
+      {/* <BrollLayer broll={editor.broll} currentTime={previewTime} /> */}
+
+      {/*
+        LAYER 3 — Captions (HTML, outside Surface)
+        Rendered on top of everything.
+        Not affected by color shader.
+        (future)
+      */}
+      {/* <CaptionLayer captions={editor.captions} currentTime={previewTime} /> */}
+
+    </div>
+  )
+}
+
+WHY THIS ORDER MATTERS:
+  Surface (gl-react)
+    └── ColorGradeLayer
+          └── VideoLayer          ← shader applied here only
+  <div> overlay
+    └── BrollLayer                ← no shader
+  <div> overlay
+    └── CaptionLayer              ← no shader
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 9 — COLOR GRADE PANEL (UNCHANGED — CORRECT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/features/color/ColorGradePanel.jsx
+
+import React from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { setColor } from "../../store/slices/editorSlice"
+
+const SLIDERS = [
+  { key: "exposure",    label: "Exposure",    min: -1,   max: 1,   step: 0.01 },
+  { key: "contrast",    label: "Contrast",    min: 0.5,  max: 2,   step: 0.01 },
+  { key: "highlights",  label: "Highlights",  min: -100, max: 100, step: 1    },
+  { key: "shadows",     label: "Shadows",     min: -100, max: 100, step: 1    },
+  { key: "whites",      label: "Whites",      min: -100, max: 100, step: 1    },
+  { key: "blacks",      label: "Blacks",      min: -100, max: 100, step: 1    },
+  { key: "saturation",  label: "Saturation",  min: 0,    max: 3,   step: 0.01 },
+  { key: "vibrance",    label: "Vibrance",    min: -1,   max: 1,   step: 0.01 },
+  { key: "temperature", label: "Temperature", min: -100, max: 100, step: 1    },
+  { key: "tint",        label: "Tint",        min: -100, max: 100, step: 1    },
+  { key: "clarity",     label: "Clarity",     min: -100, max: 100, step: 1    },
+  { key: "hue",         label: "Hue",         min: -180, max: 180, step: 1    },
+]
+
+const defaultColor = {
+  exposure: 0, contrast: 1, saturation: 1, vibrance: 0,
+  temperature: 0, tint: 0, highlights: 0, shadows: 0,
+  whites: 0, blacks: 0, clarity: 0, hue: 0
+}
+
+export default function ColorGradePanel() {
+  const dispatch = useDispatch()
+  const color    = useSelector(s => s.editor.editor.color)
+
+  const handleChange = (key, value) => {
+    dispatch(setColor({ [key]: parseFloat(value) }))
+  }
+
+  const handleReset = () => {
+    dispatch(setColor(defaultColor))
+  }
+
+  return (
+    <div className="color-grade-panel">
+      <div className="panel-header">
+        <span>Colour grade</span>
+        <button onClick={handleReset}>Reset</button>
+      </div>
+
+      {SLIDERS.map(({ key, label, min, max, step }) => (
+        <div key={key} className="slider-row">
+          <label>{label}</label>
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={color[key]}
+            onChange={e => handleChange(key, e.target.value)}
+          />
+          <span className="slider-value">
+            {parseFloat(color[key]).toFixed(2)}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 10 — COLOUR GRADE PAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/pages/ColourGradePage.jsx
+
+import React from "react"
+import ColorGradePanel from "../features/color/ColorGradePanel"
+import PreviewEngine from "../editor/PreviewEngine"
+import { useAutoSave } from "../hooks/useAutoSave"
+
+export default function ColourGradePage() {
+  useAutoSave()
+
+  return (
+    <div className="editor-step-layout">
+      <div className="left-panel">
+        <ColorGradePanel />
+      </div>
+      <div className="right-panel">
+        <PreviewEngine width={360} height={640} />
+      </div>
+    </div>
+  )
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 11 — EXPORT SERVICE (UNCHANGED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/features/export/exportService.js
+
+import api from "../../services/api"
+
+export async function triggerExport(projectId, editorState) {
+  const response = await api.post(`/projects/${projectId}/export`, {
+    editor: editorState
+  })
+  return response.data  // { jobId }
+}
+
+Usage:
+
+const editor    = useSelector(s => s.editor.editor)
+const projectId = useSelector(s => s.editor.projectId)
+
+const handleExport = async () => {
+  const { jobId } = await triggerExport(projectId, editor)
+  // socket listens for export:done
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 12 — NODE.JS EXPORT ROUTE (UNCHANGED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: src/routes/export.route.js
+
+router.post("/projects/:id/export", authenticate, async (req, res) => {
+  const { editor } = req.body
+  const { id: projectId } = req.params
+
+  if (!editor || !editor.color) {
+    return res.status(400).json({ error: "Invalid editor state" })
+  }
+
+  await Project.update(
+    { editor_json: editor },
+    { where: { id: projectId } }
+  )
+
+  const job = await exportQueue.add({
+    projectId,
+    editor,
+    userId: req.user.id
+  })
+
+  res.json({ jobId: job.id })
+})
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 13 — PYTHON: FFMPEG BUILDER (FIX 3 APPLIED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: python/ffmpeg_builder.py
+
+FIX 3: removed invalid curves='1.2' syntax
+        highlights/shadows now use eq brightness offset per-region
+        temperature/tint use colorchannelmixer (correct FFmpeg filter)
+
+def build_video_filters(editor: dict) -> str:
+    filters = []
+    color = editor.get("color", {})
+
+    exposure     = color.get("exposure",    0)
+    contrast     = color.get("contrast",    1)
+    saturation   = color.get("saturation",  1)
+    highlights   = color.get("highlights",  0)
+    shadows      = color.get("shadows",     0)
+    whites       = color.get("whites",      0)
+    blacks       = color.get("blacks",      0)
+    hue          = color.get("hue",         0)
+    vibrance     = color.get("vibrance",    0)
+    temperature  = color.get("temperature", 0)
+    tint         = color.get("tint",        0)
+    clarity      = color.get("clarity",     0)
+
+    # eq: main tone controls
+    # exposure → brightness (-1..+1 mapped to -0.5..+0.5)
+    brightness_val = exposure * 0.5
+    eq_filter = (
+        f"eq="
+        f"contrast={contrast:.3f}:"
+        f"brightness={brightness_val:.3f}:"
+        f"saturation={saturation:.3f}"
+    )
+    filters.append(eq_filter)
+
+    # hue shift
+    if abs(hue) > 0.1:
+        filters.append(f"hue=h={hue:.1f}")
+
+    # FIX 3: highlights / shadows via lut (correct approach)
+    # map highlights: shift upper tone range
+    # map shadows: shift lower tone range
+    if abs(highlights) > 0.1 or abs(shadows) > 0.1:
+        hl_shift = highlights / 100.0 * 0.15
+        sh_shift = shadows    / 100.0 * 0.15
+        # lutrgb applies a per-channel curve using expressions
+        # 'val' = current pixel value (0..1 normalized in expression)
+        lut_expr = (
+            f"if(gt(val,0.5),"
+            f"  val+{hl_shift:.4f}*(val-0.5)*2,"
+            f"  val+{sh_shift:.4f}*(0.5-val)*2"
+            f")"
+        )
+        filters.append(
+            f"lutrgb=r='{lut_expr}':g='{lut_expr}':b='{lut_expr}'"
+        )
+
+    # whites / blacks endpoint adjustment via levels
+    if abs(whites) > 0.1 or abs(blacks) > 0.1:
+        out_max = 1.0 + whites / 100.0 * 0.1
+        out_min = 0.0 + blacks / 100.0 * 0.05
+        out_max = max(0.5, min(1.5, out_max))
+        out_min = max(-0.2, min(0.3, out_min))
+        filters.append(
+            f"levels=output_min={out_min:.4f}:output_max={out_max:.4f}"
+        )
+
+    # temperature / tint via colorchannelmixer
+    if abs(temperature) > 0.1 or abs(tint) > 0.1:
+        t_shift  = temperature / 100.0 * 0.08
+        tint_shift = tint / 100.0 * 0.05
+        rr = max(0.5, min(1.5, 1.0 + t_shift))
+        bb = max(0.5, min(1.5, 1.0 - t_shift))
+        gg = max(0.5, min(1.5, 1.0 + tint_shift))
+        filters.append(
+            f"colorchannelmixer=rr={rr:.3f}:gg={gg:.3f}:bb={bb:.3f}"
+        )
+
+    # clarity via unsharp mask
+    if abs(clarity) > 0.1:
+        strength = clarity / 100.0 * 0.8
+        strength = max(-1.5, min(1.5, strength))
+        filters.append(
+            f"unsharp=luma_msize_x=5:luma_msize_y=5:luma_amount={strength:.2f}"
+        )
+
+    return ",".join(filters) if filters else "null"
+
+
+def build_audio_filter(audio: dict) -> str:
+    volume = audio.get("volume", 1)
+    volume = max(0.0, min(3.0, volume))
+    return f"volume={volume:.2f}"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 14 — PYTHON: FULL EXPORT JOB (FIX 5 APPLIED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File: python/export_job.py
+
+FIX 5: transitions now use segment index (between: N)
+        trim segments are extracted first, then transitions
+        are applied as xfade between each consecutive segment pair
+
+import subprocess
+from ffmpeg_builder import build_video_filters, build_audio_filter
+
+def run_export(job_data: dict):
+    editor      = job_data["editor"]
+    project_id  = job_data["projectId"]
+    input_path  = f"/tmp/{project_id}_source.mp4"
+    output_path = f"/tmp/{project_id}_export.mp4"
+
+    segments    = editor.get("trim", {}).get("segments", [])
+    transitions = editor.get("transitions", [])
+
+    # PHASE 1: trim segments into individual clips
+    # output: [clip_0.mp4, clip_1.mp4, ...]
+    if segments:
+        clip_paths = extract_segments(input_path, segments, project_id)
+    else:
+        clip_paths = [input_path]
+
+    # PHASE 2: concat clips with transitions between them (FIX 5)
+    # transitions[i].between = N means between clip[N] and clip[N+1]
+    if len(clip_paths) > 1:
+        concat_path = concat_with_transitions(
+            clip_paths, transitions, project_id
+        )
+    else:
+        concat_path = clip_paths[0]
+
+    # PHASE 3: color grade + effects
+    vf = build_video_filters(editor)
+
+    # PHASE 4: broll overlays (future)
+    # vf = append_broll_filters(vf, editor.get("broll", []))
+
+    # PHASE 5: captions (future)
+    # vf = append_caption_filters(vf, editor.get("captions", []))
+
+    # PHASE 6: audio
+    af = build_audio_filter(editor.get("audio", {}))
+
+    # PHASE 7: final render
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", concat_path,
+        "-vf", vf,
+        "-af", af,
+        "-c:v", "libx264",
+        "-preset", "fast",
+        "-crf", "18",
+        "-c:a", "aac",
+        "-movflags", "+faststart",
+        output_path
+    ]
+    subprocess.run(cmd, check=True)
+
+    # PHASE 8: upload to S3
+    s3_url = upload_to_s3(output_path, project_id)
+    return s3_url
+
+
+def extract_segments(input_path, segments, project_id):
+    """Trim each segment into its own temp clip."""
+    clip_paths = []
+    for i, seg in enumerate(segments):
+        out = f"/tmp/{project_id}_clip_{i}.mp4"
+        subprocess.run([
+            "ffmpeg", "-y",
+            "-i", input_path,
+            "-ss", str(seg["start"]),
+            "-to", str(seg["end"]),
+            "-c", "copy",
+            out
+        ], check=True)
+        clip_paths.append(out)
+    return clip_paths
+
+
+def concat_with_transitions(clip_paths, transitions, project_id):
+    """
+    Concat clips using xfade for transitions.
+    transitions[i] = { between: N, type: "fade", duration: 0.3 }
+    between: N means between clip[N] and clip[N+1]
+    """
+    # build transition lookup by segment index
+    trans_map = { t["between"]: t for t in transitions }
+
+    # xfade requires knowing cumulative duration of each clip
+    # for offset calculation
+    durations = []
+    for clip in clip_paths:
+        result = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries",
+             "format=duration", "-of", "csv=p=0", clip],
+            capture_output=True, text=True
+        )
+        durations.append(float(result.stdout.strip()))
+
+    # build complex filter for xfade chaining
+    filter_parts = []
+    current_label = "[0:v]"
+    cumulative_duration = durations[0]
+
+    for i in range(1, len(clip_paths)):
+        trans = trans_map.get(i - 1, { "type": "fade", "duration": 0.3 })
+        xfade_type = trans.get("type", "fade")
+        xfade_dur  = trans.get("duration", 0.3)
+        offset     = cumulative_duration - xfade_dur
+        out_label  = f"[v{i}]"
+
+        filter_parts.append(
+            f"{current_label}[{i}:v]"
+            f"xfade=transition={xfade_type}:"
+            f"duration={xfade_dur}:"
+            f"offset={offset:.3f}"
+            f"{out_label}"
+        )
+        current_label = out_label
+        cumulative_duration += durations[i] - xfade_dur
+
+    out_path = f"/tmp/{project_id}_concat.mp4"
+
+    inputs = []
+    for path in clip_paths:
+        inputs += ["-i", path]
+
+    cmd = (
+        ["ffmpeg", "-y"]
+        + inputs
+        + ["-filter_complex", ";".join(filter_parts)]
+        + ["-map", current_label]
+        + ["-c:v", "libx264", "-preset", "fast", out_path]
+    )
+    subprocess.run(cmd, check=True)
+    return out_path
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 15 — DB SCHEMA (UNCHANGED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Postgres migration:
+
+ALTER TABLE projects
+ADD COLUMN editor_json JSONB DEFAULT '{}';
+
+Sequelize model:
+
+editor_json: {
+  type: DataTypes.JSONB,
+  defaultValue: {}
+}
+
+Load on page mount:
+
+const project = await Project.findByPk(projectId)
+dispatch(loadProject({
+  projectId: project.id,
+  editor: project.editor_json || defaultEditorState
+}))
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 16 — SOCKET EVENTS (UNCHANGED — ALREADY IN ZENXIFY)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Backend emits:
+
+socket.emit("export:progress", { jobId, percent })
+socket.emit("export:done",     { jobId, url: s3Url })
+socket.emit("export:error",    { jobId, message })
+
+Frontend listens:
+
+socket.on("export:done", ({ url }) => {
+  setDownloadUrl(url)
+})
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 17 — FILE STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+src/
+├── store/
+│   ├── editorSchema.js
+│   └── slices/editorSlice.js
+│
+├── hooks/
+│   └── useAutoSave.js
+│
+├── editor/
+│   ├── PreviewEngine.jsx           ← FIX 4 applied (layer order)
+│   ├── shaders/
+│   │   └── colorGradeShader.js     ← FIX 2 applied (clarity neighbors)
+│   └── layers/
+│       ├── VideoLayer.jsx          ← FIX 1 applied (rAF loop)
+│       ├── ColorGradeLayer.jsx
+│       ├── CaptionLayer.jsx        (future — HTML overlay)
+│       └── BrollLayer.jsx          (future — HTML overlay)
+│
+├── features/
+│   ├── color/
+│   │   └── ColorGradePanel.jsx
+│   └── export/
+│       └── exportService.js
+│
+└── pages/
+    └── ColourGradePage.jsx
+
+python/
+├── ffmpeg_builder.py               ← FIX 3 applied (valid filter syntax)
+└── export_job.py                   ← FIX 5 applied (segment-indexed transitions)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 18 — IMPLEMENTATION ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[1]  editorSchema.js          ← foundation, do first
+[2]  editorSlice.js           ← Redux store
+[3]  DB migration             ← add editor_json column
+[4]  loadProject on mount     ← load from DB into Redux
+[5]  npm install gl-react gl-react-dom framer-motion gsap
+[6]  colorGradeShader.js      ← GLSL with fix 2
+[7]  VideoLayer.jsx           ← with rAF fix 1
+[8]  ColorGradeLayer.jsx      ← shader node
+[9]  PreviewEngine.jsx        ← correct layer order fix 4
+[10] ColorGradePanel.jsx      ← sliders UI
+[11] ColourGradePage.jsx      ← assemble step page
+[12] useAutoSave.js           ← debounce save
+[13] export route (Node)      ← POST /export
+[14] ffmpeg_builder.py        ← fix 3 filter syntax
+[15] export_job.py            ← fix 5 segment transitions
+[16] Test: move slider → preview updates instantly
+[17] Test: export → FFmpeg output matches preview
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FIXES APPLIED — SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FIX 1  VideoLayer.jsx        requestAnimationFrame loop added
+       file: src/editor/layers/VideoLayer.jsx
+
+FIX 2  colorGradeShader.js   clarity samples 4 neighbor UVs
+       file: src/editor/shaders/colorGradeShader.js
+
+FIX 3  ffmpeg_builder.py     curves syntax replaced with
+                             lutrgb + levels + colorchannelmixer
+       file: python/ffmpeg_builder.py
+
+FIX 4  PreviewEngine.jsx     BrollLayer + CaptionLayer moved
+                             outside Surface as HTML overlays
+       file: src/editor/PreviewEngine.jsx
+
+FIX 5  editorSchema.js       transitions.between references
+       export_job.py         segment index, not timecode
+                             xfade applied between segment pairs
+       files: editorSchema.js + python/export_job.py
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FUTURE FEATURES (scaffolded in JSON, zero refactor needed)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CAPTIONS
+  frontend: CaptionLayer.jsx  (framer-motion, HTML overlay)
+  backend:  append_caption_filters() → FFmpeg drawtext
+
+BROLL
+  frontend: BrollLayer.jsx   (HTML overlay, absolute positioned)
+  backend:  append_broll_filters() → FFmpeg overlay filter
+
+TRANSITIONS
+  frontend: GSAP between clip preview
+  backend:  xfade already implemented in export_job.py
+
+AUDIO BGM
+  frontend: audio element, volume slider
+  backend:  amix + volume filter (build_audio_filter already exists)
+
+All features read from the same editor JSON.
+No schema changes. No Redux changes. No pipeline changes.

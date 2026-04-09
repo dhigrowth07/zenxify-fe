@@ -1,26 +1,22 @@
-import React, { useState } from 'react';
-import { 
-  Monitor, 
-  SkipBack, 
-  Play, 
-  SkipForward, 
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import {
+  Monitor,
+  SkipBack,
+  Play,
+  SkipForward,
   Maximize2
 } from 'lucide-react';
-import { 
-  ColorWheel, 
-  ColorWheelTrack, 
-  ColorThumb, 
-  parseColor 
+import {
+  ColorWheel,
+  ColorWheelTrack,
+  ColorThumb,
+  parseColor
 } from 'react-aria-components';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-/**
- * @param {...any} inputs 
- */
-function cn(...inputs) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from '../../lib/utils';
+import { Skeleton } from '../../components/ui/Skeleton';
+import { getProject } from '../../services/projectServices';
+import VideoPreview from '../../components/shared/VideoPreview';
 
 const COLOR_PRESETS = [
   {
@@ -98,22 +94,42 @@ const COLOR_PRESETS = [
 ];
 
 const ColourGradePage = () => {
+  const { id } = useParams();
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [selectedPreset, setSelectedPreset] = useState("none");
   const [color, setColor] = useState({
-    exposure: 0.15,
-    contrast: 1.1,
-    highlights: -5,
-    shadows: 8,
-    whites: -3,
-    blacks: 5,
-    saturation: 1.2,
-    vibrance: 0.12,
-    clarity: 15,
+    exposure: 0,
+    contrast: 1,
+    highlights: 0,
+    shadows: 0,
+    whites: 0,
+    blacks: 0,
+    saturation: 1,
+    vibrance: 0,
+    clarity: 0,
     temperature: 0,
     tint: 0,
-    hue: 12,
-    hsl: { hue: 12, saturation: 100, luminance: 0 }
+    hue: 0,
+    hsl: { hue: 0, saturation: 0, luminance: 0 }
   });
+
+  useEffect(() => {
+    const fetchProjectData = async () => {
+      if (!id) return;
+      try {
+        const res = await getProject(id);
+        if (res?.data) {
+          setProject(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch project:", err);
+      } finally {
+        setTimeout(() => setLoading(false), 800);
+      }
+    };
+    fetchProjectData();
+  }, [id]);
 
   /**
    * @param {any} preset 
@@ -123,7 +139,7 @@ const ColourGradePage = () => {
     setColor(prev => ({
       ...prev,
       ...preset.color,
-      hsl: { ...prev.hsl } // Keep current HSL adjustments
+      hsl: { ...prev.hsl }
     }));
   };
 
@@ -147,42 +163,101 @@ const ColourGradePage = () => {
     }));
   };
 
-  // Convert state to react-aria color object for the wheel
   const wheelColor = parseColor(`hsl(${color.hsl.hue}, ${color.hsl.saturation}%, 50%)`);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-12 gap-4 items-stretch">
+        <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
+          <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 h-[220px]">
+            <Skeleton className="w-32 h-6 mb-4" />
+            <div className="grid grid-cols-4 gap-2">
+              {[...Array(8)].map((_, i) => (
+                <Skeleton key={i} className="aspect-square rounded-2xl" />
+              ))}
+            </div>
+          </div>
+          <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 flex-1 flex flex-col items-center">
+            <Skeleton className="w-32 h-6 self-start mb-6" />
+            <Skeleton variant="circle" className="w-32 h-32 mb-8" />
+            <div className="w-full space-y-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          </div>
+        </div>
+
+        <div className="col-span-12 lg:col-span-4 h-full">
+          <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 h-full flex flex-col">
+            <Skeleton className="w-40 h-6 mb-6" />
+            <div className="space-y-6 flex-1">
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton className="w-16 h-3" />
+                    <Skeleton className="w-8 h-3" />
+                  </div>
+                  <Skeleton className="h-2 w-full" />
+                </div>
+              ))}
+            </div>
+            <Skeleton className="h-10 w-full mt-6 rounded-xl" />
+          </div>
+        </div>
+
+        <div className="col-span-12 lg:col-span-3 flex flex-col">
+          <div className="flex justify-between items-end mb-4 px-1">
+            <Skeleton className="w-24 h-8" />
+            <div className="flex gap-3">
+              <Skeleton className="w-5 h-5" />
+              <Skeleton className="w-5 h-5" />
+            </div>
+          </div>
+          <Skeleton className="aspect-9/16 w-full rounded-3xl mb-6" />
+          <div className="flex justify-center gap-8 mb-6">
+            <Skeleton className="w-6 h-6" />
+            <Skeleton className="w-8 h-8 rounded-full" />
+            <Skeleton className="w-6 h-6" />
+          </div>
+          <Skeleton className="h-14 w-full mt-auto rounded-xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-in fade-in duration-700">
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-12 gap-4 items-stretch">
         {/* Left Column (Presets & HSL) */}
-        <div className="col-span-12 lg:col-span-5 flex flex-col gap-4 order-2 lg:order-1">
-          {/* Colour Grade Presets */}
+        <div className="col-span-12 lg:col-span-5 flex flex-col gap-4 order-2 lg:order-1 self-stretch">
           <div className="bg-white rounded-3xl p-4 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0]">
             <h2 className="text-lg font-bold text-charcoal mb-2">Colour grade presets</h2>
             <div className="grid grid-cols-4 gap-2">
               {COLOR_PRESETS.map((preset) => (
-                <button 
-                  key={preset.id} 
+                <button
+                  key={preset.id}
                   onClick={() => applyPreset(preset)}
                   className={cn(
                     "relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group",
                     selectedPreset === preset.id ? "border-primary shadow-lg scale-95" : "border-transparent hover:border-gray-200"
                   )}
                 >
-                  <div 
+                  <div
                     className={cn(
                       "absolute inset-0 flex items-center justify-center p-2 text-center transition-opacity group-hover:opacity-90",
                       preset.id === 'none' ? 'bg-[#F3F4F6]' : ''
                     )}
                     style={{
-                      background: preset.id === 'none' ? undefined : 
+                      background: preset.id === 'none' ? undefined :
                         preset.id === 'cinematic' ? 'linear-gradient(45deg, #004d4d, #b35900)' :
-                        preset.id === 'warm' ? 'linear-gradient(45deg, #ff9933, #ffcc00)' :
-                        preset.id === 'cool' ? 'linear-gradient(45deg, #006699, #66ccff)' :
-                        preset.id === 'vivid' ? 'linear-gradient(45deg, #ff0066, #ffcc00)' :
-                        preset.id === 'soft' ? 'linear-gradient(45deg, #e6b3cc, #ffcc99)' :
-                        preset.id === 'dramatic' ? 'linear-gradient(45deg, #1a1a1a, #660000)' :
-                        preset.id === 'podcast' ? 'linear-gradient(45deg, #4d2600, #996633)' : 
-                        'var(--brand-gradient)'
+                          preset.id === 'warm' ? 'linear-gradient(45deg, #ff9933, #ffcc00)' :
+                            preset.id === 'cool' ? 'linear-gradient(45deg, #006699, #66ccff)' :
+                              preset.id === 'vivid' ? 'linear-gradient(45deg, #ff0066, #ffcc00)' :
+                                preset.id === 'soft' ? 'linear-gradient(45deg, #e6b3cc, #ffcc99)' :
+                                  preset.id === 'dramatic' ? 'linear-gradient(45deg, #1a1a1a, #660000)' :
+                                    preset.id === 'podcast' ? 'linear-gradient(45deg, #4d2600, #996633)' :
+                                      'var(--brand-gradient)'
                     }}
                   >
                     <span className={cn(
@@ -202,14 +277,11 @@ const ColourGradePage = () => {
             </div>
           </div>
 
-          {/* HSL Adjustments */}
-          <div className="bg-white rounded-3xl p-4 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0]">
+          <div className="bg-white rounded-3xl p-4 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0] flex-1 flex flex-col">
             <h2 className="text-lg font-bold text-charcoal mb-2">HSL Adjustments</h2>
-            
-            <div className="flex flex-col lg:flex-row gap-4 items-center lg:items-start">
-              {/* Interactive Color Wheel Section */}
+            <div className="flex flex-col gap-4 items-center flex-1">
               <div className="relative shrink-0 flex items-center justify-center p-1">
-                <ColorWheel 
+                <ColorWheel
                   value={wheelColor}
                   onChange={(c) => updateHsl('hue', c.getChannelValue('hue'))}
                   outerRadius={65}
@@ -218,47 +290,47 @@ const ColourGradePage = () => {
                   <ColorWheelTrack className="w-32 h-32 rounded-full" />
                   <ColorThumb className="w-5 h-5 bg-white border-2 border-charcoal rounded-full shadow-md focus-visible:ring-2 ring-primary cursor-pointer transition-transform active:scale-125 z-20" />
                 </ColorWheel>
-                
-                {/* Custom Zenxify Center Overlay - Perfectly Centered */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-1">
-                   <div 
-                     className="w-[80px] h-[80px] bg-white rounded-full flex items-center justify-center shadow-md transition-colors"
-                     style={{ 
-                       backgroundColor: `hsl(${color.hsl.hue}, ${color.hsl.saturation}%, ${(color.hsl.luminance / 2) + 50}%)` 
-                     }}
-                   >
-                      <div className="w-[85%] h-[85%] rounded-full relative shadow-inner flex items-center justify-center mix-blend-overlay">
-                        <div className="absolute w-2 h-2 bg-white/40 rounded-full top-1/4 left-1/4" />
-                      </div>
-                   </div>
+                  <div
+                    className="w-[80px] h-[80px] bg-white rounded-full flex items-center justify-center shadow-md transition-colors"
+                    style={{
+                      backgroundColor: `hsl(${color.hsl.hue}, ${color.hsl.saturation}%, ${(color.hsl.luminance / 2) + 50}%)`
+                    }}
+                  >
+                    <div className="w-[85%] h-[85%] rounded-full relative shadow-inner flex items-center justify-center mix-blend-overlay">
+                      <div className="absolute w-2 h-2 bg-white/40 rounded-full top-1/4 left-1/4" />
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* HSL Sliders - Constrained to prevent overflow */}
-              <div className="flex-1 w-full min-w-0 space-y-2.5">
-                <Slider 
-                  label="Hue" 
-                  value={color.hsl.hue} 
-                  min={0} max={360} 
-                  trackClass="bg-gradient-to-r from-red-500 via-yellow-400 via-green-500 via-cyan-400 via-blue-500 via-purple-500 to-red-500"
-                  onChange={(v) => updateHsl('hue', v)}
-                />
-                <Slider 
-                  label="Saturation" 
-                  value={color.hsl.saturation} 
-                  min={0} max={100} 
-                  trackClass="bg-gradient-to-r from-[#5D4037] to-[#8D6E63]"
-                  onChange={(v) => updateHsl('saturation', v)}
-                />
-                <Slider 
-                  label="Luminance" 
-                  value={color.hsl.luminance} 
-                  min={-100} max={100} 
-                  trackClass="bg-gradient-to-r from-[#424242] via-[#FDD835] to-[#FFFFFF]"
-                  onChange={(v) => updateHsl('luminance', v)}
-                />
-
-                <div className="pt-2">
+              <div className="flex-1 w-full min-w-0 flex flex-col justify-center">
+                <div className="space-y-2.5">
+                  <Slider
+                    label="Hue"
+                    value={color.hsl.hue}
+                    min={0} max={360}
+                    step={1}
+                    trackClass="bg-gradient-to-r from-red-500 via-yellow-400 via-green-500 via-cyan-400 via-blue-500 via-purple-500 to-red-500"
+                    onChange={(val) => updateHsl('hue', val)}
+                  />
+                  <Slider
+                    label="Saturation"
+                    value={color.hsl.saturation}
+                    min={0} max={100}
+                    step={1}
+                    trackClass="bg-gradient-to-r from-[#5D4037] to-[#8D6E63]"
+                    onChange={(val) => updateHsl('saturation', val)}
+                  />
+                  <Slider
+                    label="Luminance"
+                    value={color.hsl.luminance}
+                    min={-100} max={100}
+                    step={1}
+                    trackClass="bg-gradient-to-r from-[#424242] via-[#FDD835] to-[#FFFFFF]"
+                    onChange={(val) => updateHsl('luminance', val)}
+                  />
+                </div>
+                <div className="mt-auto pt-4">
                   <button className="w-full py-2.5 rounded-xl bg-brand-gradient text-white font-bold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all">
                     Apply Adjustments
                   </button>
@@ -269,153 +341,56 @@ const ColourGradePage = () => {
         </div>
 
         {/* Middle Column (Basic Adjustments) */}
-        <div className="col-span-12 lg:col-span-4 order-3 lg:order-2">
-          <div className="bg-white rounded-3xl px-4 py-4 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0]">
+        <div className="col-span-12 lg:col-span-4 order-3 lg:order-2 self-stretch">
+          <div className="bg-white rounded-3xl p-4 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0] flex flex-col h-full">
             <h2 className="text-lg font-bold text-charcoal mb-4">Basic Adjustments</h2>
-            <div className="space-y-4">
-              <Slider 
-                label="Exposure" 
-                value={color.exposure} 
-                min={-1} max={1} step={0.01}
-                trackClass="bg-brand-gradient"
-                onChange={(v) => updateColor('exposure', v)}
-              />
-              <Slider 
-                label="Contrast" 
-                value={color.contrast} 
-                min={0.5} max={2} step={0.01}
-                trackClass="bg-brand-gradient"
-                onChange={(v) => updateColor('contrast', v)}
-              />
-              <Slider 
-                label="Highlights" 
-                value={color.highlights} 
-                min={-100} max={100}
-                trackClass="bg-brand-gradient"
-                onChange={(v) => updateColor('highlights', v)}
-              />
-              <Slider 
-                label="Shadows" 
-                value={color.shadows} 
-                min={-100} max={100}
-                trackClass="bg-brand-gradient"
-                onChange={(v) => updateColor('shadows', v)}
-              />
-              <Slider 
-                label="Whites" 
-                value={color.whites} 
-                min={-100} max={100}
-                trackClass="bg-brand-gradient"
-                onChange={(v) => updateColor('whites', v)}
-              />
-              <Slider 
-                label="Blacks" 
-                value={color.blacks} 
-                min={-100} max={100}
-                trackClass="bg-brand-gradient"
-                onChange={(v) => updateColor('blacks', v)}
-              />
-              <Slider 
-                label="Saturation" 
-                value={color.saturation} 
-                min={0} max={3} step={0.01}
-                trackClass="bg-brand-gradient"
-                onChange={(v) => updateColor('saturation', v)}
-              />
-              <Slider 
-                label="Vibrance" 
-                value={color.vibrance} 
-                min={-1} max={1} step={0.01}
-                trackClass="bg-brand-gradient"
-                onChange={(v) => updateColor('vibrance', v)}
-              />
-              <Slider 
-                label="Clarity" 
-                value={color.clarity} 
-                min={-100} max={100}
-                trackClass="bg-brand-gradient"
-                onChange={(v) => updateColor('clarity', v)}
-              />
+            <div className="grid grid-cols-1 gap-x-4 gap-y-2.5 flex-1">
+              <Slider label="Exposure" value={color.exposure} min={-1} max={1} step={0.01} trackClass="bg-brand-gradient" onChange={(val) => updateColor('exposure', val)} />
+              <Slider label="Contrast" value={color.contrast} min={0.5} max={2} step={0.01} trackClass="bg-brand-gradient" onChange={(val) => updateColor('contrast', val)} />
+              <Slider label="Highlights" value={color.highlights} min={-100} max={100} step={1} trackClass="bg-brand-gradient" onChange={(val) => updateColor('highlights', val)} />
+              <Slider label="Shadows" value={color.shadows} min={-100} max={100} step={1} trackClass="bg-brand-gradient" onChange={(val) => updateColor('shadows', val)} />
+              <Slider label="Whites" value={color.whites} min={-100} max={100} step={1} trackClass="bg-brand-gradient" onChange={(val) => updateColor('whites', val)} />
+              <Slider label="Blacks" value={color.blacks} min={-100} max={100} step={1} trackClass="bg-brand-gradient" onChange={(val) => updateColor('blacks', val)} />
+              <Slider label="Saturation" value={color.saturation} min={0} max={3} step={0.01} trackClass="bg-brand-gradient" onChange={(val) => updateColor('saturation', val)} />
+              <Slider label="Vibrance" value={color.vibrance} min={-1} max={1} step={0.01} trackClass="bg-brand-gradient" onChange={(val) => updateColor('vibrance', val)} />
+              <Slider label="Clarity" value={color.clarity} min={-100} max={100} step={1} trackClass="bg-brand-gradient" onChange={(val) => updateColor('clarity', val)} />
+            </div>
+            <div className="mt-auto pt-4 border-t border-gray-100">
+              <button onClick={() => applyPreset(COLOR_PRESETS[0])} className="w-full py-2.5 rounded-xl border-2 border-[#e9e4f0] text-charcoal font-bold text-sm hover:bg-gray-50 transition-all active:scale-[0.98]">Reset to Default</button>
             </div>
           </div>
         </div>
 
         {/* Right Column (Preview & Action) */}
-        <div className="col-span-12 lg:col-span-3 flex flex-col pt-1 order-1 lg:order-3">
-           <div className="flex justify-between items-end mb-2 px-1">
-              <h2 className="text-2xl font-bold text-gray-400 uppercase tracking-widest opacity-70">Preview</h2>
-              <div className="flex gap-3 text-charcoal">
-                <Monitor size={20} className="cursor-pointer hover:text-primary transition-colors" />
-                <Maximize2 size={20} className="cursor-pointer hover:text-primary transition-colors" />
-              </div>
-           </div>
-
-           <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-9/16 bg-black border-[6px] border-white">
-              <img 
-                src="https://images.unsplash.com/photo-1590086782792-42dd2350140d?q=80&w=1000&auto=format&fit=crop" 
-                alt="Preview"
-                className="w-full h-full object-cover"
-              />
-           </div>
-
-           {/* Media Controls - Tightened */}
-           <div className="flex justify-center items-center gap-8 py-4">
-              <SkipBack size={24} className="text-charcoal cursor-pointer hover:scale-110 transition-transform" />
-              <Play size={32} className="text-charcoal cursor-pointer hover:scale-110 transition-transform" fill="currentColor" />
-              <SkipForward size={24} className="text-charcoal cursor-pointer hover:scale-110 transition-transform" />
-           </div>
-
-           {/* Bottom CTA */}
-           <button className="w-full py-3.5 rounded-xl bg-brand-gradient text-white font-bold text-lg shadow-lg hover:opacity-90 active:scale-[0.98] transition-all">
-             Add B-roll
-           </button>
-        </div>
+        <VideoPreview
+          project={project}
+          color={color}
+          className="col-span-12 lg:col-span-3 order-1 lg:order-3"
+          actionButton={
+            <button className="w-full py-3.5 rounded-xl bg-brand-gradient text-white font-bold text-lg shadow-lg hover:opacity-90 active:scale-[0.98] transition-all">
+              Add B-roll
+            </button>
+          }
+        />
       </div>
     </div>
   );
 };
 
-/**
- * @param {{ label: string, value: number, min?: number, max?: number, step?: number, onChange: (v: number) => void, trackClass: string, isFloating?: boolean }} props
- */
-const Slider = ({ label, value, min = -100, max = 100, step, onChange, trackClass, isFloating = false }) => {
+const Slider = ({ label, value, min = -100, max = 100, step = 1, onChange, trackClass, isFloating = false }) => {
   const isDecimal = (step && step < 1) || isFloating;
   const percentage = ((value - min) / (max - min)) * 100;
-
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between items-center text-xs font-bold text-charcoal">
         <span>{label}</span>
-        <span className="font-mono opacity-80">
-          {value > 0 ? '+' : ''}
-          {isDecimal ? value.toFixed(2) : value}
-        </span>
+        <span className="font-mono opacity-80">{value > 0 ? '+' : ''}{isDecimal ? value.toFixed(2) : value}</span>
       </div>
       <div className="relative h-2 w-full flex items-center">
-         {/* Background Track (Grey) */}
-         <div className="absolute inset-0 rounded-full bg-[#E5E7EB]" />
-         
-         {/* Filled Track (Colored) */}
-         <div 
-           className={cn("absolute inset-y-0 left-0 rounded-full", trackClass)} 
-           style={{ width: `${percentage}%` }}
-         />
-
-         <input 
-           type="range"
-           min={min}
-           max={max}
-           step={step || (isFloating ? 0.01 : 1)}
-           value={value}
-           onChange={(e) => onChange(parseFloat(e.target.value))}
-           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-         />
-         
-         {/* Custom Thumb */}
-         <div 
-          className="absolute w-5 h-5 bg-white rounded-full shadow-md border-2 border-white pointer-events-none transition-transform"
-          style={{ left: `calc(${percentage}% - 10px)` }}
-         />
+        <div className="absolute inset-0 rounded-full bg-[#E5E7EB]" />
+        <div className={cn("absolute inset-y-0 left-0 rounded-full", trackClass)} style={{ width: `${percentage}%` }} />
+        <input type="range" min={min} max={max} step={step || (isFloating ? 0.01 : 1)} value={value} onChange={(e) => onChange(parseFloat(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+        <div className="absolute w-5 h-5 bg-white rounded-full shadow-md border-2 border-white pointer-events-none transition-transform" style={{ left: `calc(${percentage}% - 10px)` }} />
       </div>
     </div>
   );

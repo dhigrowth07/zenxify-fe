@@ -20,7 +20,7 @@ const VideoEditorLayout = () => {
             {/* Horizontal Navigation / Stepper */}
             <div className="flex flex-wrap justify-center gap-2 mb-10 lg:mb-14">
                 {EDITOR_STEPS.map((step) => {
-                    const isActive = location.pathname === step.route;
+                    const isActive = location.pathname.startsWith(step.route);
                     // In a real app, you'd also check if a step is "completed" based on project state
                     return (
                         <div
