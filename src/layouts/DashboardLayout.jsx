@@ -5,10 +5,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import Sidebar from '../components/shared/Sidebar';
 // ... rest of imports (simulated)
 import NotificationPanel from '../components/shared/NotificationPanel';
-import {
-    fetchNotificationsAsync,
-    addNotification,
-    selectUnreadCount
+import { 
+    fetchNotificationsAsync, 
+    addNotification, 
+    selectUnreadCount 
 } from '../redux/notifications/notificationSlice';
 import { initNotificationStream } from '../services/notificationServices';
 
@@ -42,13 +42,13 @@ const DashboardLayout = () => {
         });
 
         const handleClickOutside = (/** @type {MouseEvent} */ event) => {
-            if (notificationRef.current && !notificationRef.current.contains(/** @type {Node} */(event.target))) {
+            if (notificationRef.current && !notificationRef.current.contains(/** @type {Node} */ (event.target))) {
                 setShowNotifications(false);
             }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
-
+        
         return () => {
             closeStream();
             document.removeEventListener('mousedown', handleClickOutside);
@@ -86,12 +86,13 @@ const DashboardLayout = () => {
 
                     <div className="flex items-center gap-6">
                         <div className="relative" ref={notificationRef}>
-                            <button
+                            <button 
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className={`relative p-3 transition-all rounded-full group active:scale-90 shadow-sm border ${showNotifications
-                                        ? 'bg-primary/10 text-primary border-primary/20'
-                                        : 'bg-[#EEF2F6] dark:bg-gray-900/50 text-charcoal dark:text-gray-400 hover:text-primary hover:bg-primary/5 border-black/5 dark:border-white/5'
-                                    }`}
+                                className={`relative p-3 transition-all rounded-full group active:scale-90 shadow-sm border ${
+                                    showNotifications 
+                                    ? 'bg-primary/10 text-primary border-primary/20' 
+                                    : 'bg-[#EEF2F6] dark:bg-gray-900/50 text-charcoal dark:text-gray-400 hover:text-primary hover:bg-primary/5 border-black/5 dark:border-white/5'
+                                }`}
                             >
                                 <Bell size={20} strokeWidth={2} />
                                 {unreadCount > 0 && (
@@ -106,7 +107,7 @@ const DashboardLayout = () => {
                             )}
                         </div>
 
-                        <Link
+                        <Link 
                             to="/settings/billing?tab=plans"
                             className="flex items-center gap-3 px-8 py-3.5 bg-charcoal dark:bg-primary text-white rounded-[20px] font-black uppercase tracking-widest text-xs hover:scale-[1.03] active:scale-95 transition-all shadow-xl hover:shadow-primary/30"
                         >

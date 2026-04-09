@@ -23,7 +23,7 @@ const passthrough = Shaders.create({
         bool outOfBounds = false;
         
         if (resizeMode == 0) {
-          // COVER logic with a tiny bleed to fix corner gaps
+          // COVER logic: Shrink the UVs of the overhanging axis
           float bleed = 1.005; 
           if (ratio > 1.0) {
             newUv.x = (uv.x - 0.5) / (ratio * bleed) + 0.5;
@@ -31,17 +31,15 @@ const passthrough = Shaders.create({
             newUv.y = (uv.y - 0.5) * (ratio / bleed) + 0.5;
           }
         } else {
-          // CONTAIN logic
+          // CONTAIN logic: Expand the UVs to create black bars
           if (ratio > 1.0) {
-            newUv.y = (uv.y - 0.5) / ratio + 0.5;
-            if (newUv.y < 0.0 || newUv.y > 1.0) outOfBounds = true;
+            newUv.y = (uv.y - 0.5) * ratio + 0.5;
           } else {
-            newUv.x = (uv.x - 0.5) * ratio + 0.5;
-            if (newUv.x < 0.0 || newUv.x > 1.0) outOfBounds = true;
+            newUv.x = (uv.x - 0.5) / ratio + 0.5;
           }
         }
         
-        if (outOfBounds) {
+        if (newUv.x < 0.0 || newUv.x > 1.0 || newUv.y < 0.0 || newUv.y > 1.0) {
           gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
         } else {
           gl_FragColor = texture2D(t, newUv);
@@ -67,16 +65,20 @@ export default function VideoLayer({ videoRef, surfaceWidth, surfaceHeight, resi
     let raf = null;
     const loop = () => {
       setTick(t => t + 1);
-      if (videoRef && videoRef.current && videoRef.current.videoWidth) {
-        setVAspect(videoRef.current.videoWidth / videoRef.current.videoHeight);
-      }
       raf = requestAnimationFrame(loop);
     };
     loop();
     return () => {
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [videoRef]);
+  }, []);
+
+  // Sync aspect ratio whenever video metadata changes
+  useEffect(() => {
+    if (videoRef?.current?.videoWidth) {
+      setVAspect(videoRef.current.videoWidth / videoRef.current.videoHeight);
+    }
+  }, [videoRef?.current?.videoWidth, videoRef?.current?.videoHeight]);
 
   const sAspect = surfaceWidth / surfaceHeight || 1;
 

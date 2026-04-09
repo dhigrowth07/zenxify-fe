@@ -6,7 +6,8 @@ import {
   SkipBack,
   Play,
   SkipForward,
-  Maximize2
+  Maximize2,
+  RotateCcw
 } from 'lucide-react';
 import {
   ColorWheel,
@@ -287,7 +288,16 @@ const ColourGradePage = () => {
           </div>
 
           <div className="bg-white rounded-3xl p-4 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0] flex-1 flex flex-col">
-            <h2 className="text-lg font-bold text-charcoal mb-2">HSL Adjustments</h2>
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-bold text-charcoal">HSL Adjustments</h2>
+              <button
+                onClick={() => dispatch(setHsl({ hue: 0, saturation: 0, luminance: 0 }))}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/5 transition-all active:scale-95 group/reset"
+                title="Reset HSL"
+              >
+                <RotateCcw size={16} className="group-hover/reset:rotate-[-45deg] transition-transform" />
+              </button>
+            </div>
             <div className="flex flex-col gap-4 items-center flex-1">
               <div className="relative shrink-0 flex items-center justify-center p-1">
                 <ColorWheel

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import {
-  Maximize2,
-  SkipBack,
-  Play,
+import { 
+  Maximize2, 
+  SkipBack, 
+  Play, 
   Pause,
   SkipForward,
   Volume2,
@@ -14,16 +14,16 @@ import PreviewEngine from '../../editor/PreviewEngine';
 import VideoModal from './VideoModal';
 import { setIsPlaying, setPreviewTime } from '../../redux/editor/editorSlice';
 
-const VideoPreview = ({
-  project,
-  actionButton,
-  title = "Preview",
-  className
+const VideoPreview = ({ 
+  project, 
+  actionButton, 
+  title = "Preview", 
+  className 
 }) => {
   const dispatch = useDispatch();
   const isPlaying = useSelector((state) => state.editor.isPlaying);
   const previewTime = useSelector((state) => state.editor.previewTime);
-
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [volume, setVolume] = useState(0.7);
   const [isMuted, setIsMuted] = useState(true);
@@ -54,9 +54,9 @@ const VideoPreview = ({
           {title}
         </h2>
         <div className="flex gap-3 text-charcoal">
-          <Maximize2
-            size={20}
-            className="cursor-pointer hover:text-primary transition-colors active:scale-90"
+          <Maximize2 
+            size={20} 
+            className="cursor-pointer hover:text-primary transition-colors active:scale-90" 
             onClick={() => setIsModalOpen(true)}
           />
         </div>
@@ -64,34 +64,34 @@ const VideoPreview = ({
 
       <div className="relative rounded-[28px] overflow-hidden shadow-2xl aspect-9/16 bg-white border-[6px] border-white group/video">
         {project?.video_url ? (
-          <PreviewEngine
+          <PreviewEngine 
             volume={volume}
             muted={isMuted}
             isPlaying={isPlaying && !isModalOpen}
           />
         ) : (
-          <img
-            src={project?.thumbnail_url || "https://images.unsplash.com/photo-1590086782792-42dd2350140d?q=80&w=1000&auto=format&fit=crop"}
-            alt="Preview"
-            className="w-full h-full object-cover"
+          <img 
+            src={project?.thumbnail_url || "https://images.unsplash.com/photo-1590086782792-42dd2350140d?q=80&w=1000&auto=format&fit=crop"} 
+            alt="Preview" 
+            className="w-full h-full object-cover" 
           />
         )}
       </div>
 
       <div className="mt-auto">
         <div className="flex rounded-2xl shadow-[inset_0_0_10px_rgba(0,0,0,0.1)] items-center gap-3 px-2 mb-4 mt-2 py-3 group/volume">
-          <button
+          <button 
             onClick={toggleMute}
             className="text-gray-400 hover:text-primary transition-colors"
           >
             {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
           <div className="relative flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden cursor-pointer">
-            <div
+            <div 
               className="absolute inset-y-0 left-0 bg-brand-gradient transition-all duration-200"
               style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
             />
-            <input
+            <input 
               type="range"
               min="0"
               max="1"
@@ -107,12 +107,12 @@ const VideoPreview = ({
         </div>
 
         <div className="flex justify-center items-center gap-8 py-3 bg-gray-50/50 rounded-2xl mb-4 border border-gray-100/50 shadow-inner">
-          <SkipBack
-            size={20}
-            className="text-charcoal cursor-pointer hover:scale-110 transition-all hover:text-primary"
+          <SkipBack 
+            size={20} 
+            className="text-charcoal cursor-pointer hover:scale-110 transition-all hover:text-primary" 
             onClick={() => skip(-10)}
           />
-          <button
+          <button 
             onClick={togglePlay}
             className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center hover:scale-110 hover:shadow-lg transition-all active:scale-95 group/play"
           >
@@ -122,16 +122,16 @@ const VideoPreview = ({
               <Play size={20} className="text-charcoal translate-x-0.5 group-hover:text-primary transition-colors" fill="currentColor" />
             )}
           </button>
-          <SkipForward
-            size={20}
-            className="text-charcoal cursor-pointer hover:scale-110 transition-all hover:text-primary"
+          <SkipForward 
+            size={20} 
+            className="text-charcoal cursor-pointer hover:scale-110 transition-all hover:text-primary" 
             onClick={() => skip(10)}
           />
         </div>
         {actionButton}
       </div>
 
-      <VideoModal
+      <VideoModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         videoUrl={project?.video_url}

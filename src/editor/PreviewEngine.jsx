@@ -65,7 +65,12 @@ export default function PreviewEngine({
   useEffect(() => {
     if (!videoRef.current) return;
     if (isPlaying) {
-      videoRef.current.play().catch(e => console.warn("Autoplay blocked", e));
+      // Only attempt to play if video is ready to avoid AbortError conflicts
+      if (videoRef.current.readyState >= 2) {
+        videoRef.current.play().catch(e => {
+          if (e.name !== 'AbortError') console.warn("Autoplay blocked", e);
+        });
+      }
     } else {
       videoRef.current.pause();
     }
@@ -109,7 +114,10 @@ export default function PreviewEngine({
           const { videoWidth, videoHeight } = target;
           if (videoWidth && videoHeight) {
             const aspect = videoWidth / videoHeight;
-            onMetadataLoaded?.({ width: videoWidth, height: videoHeight, aspect });
+            // Prevent spamming the parent with the same data
+            if (Math.abs(aspect - (editorState?.color?.hsl?.lastAspect || 0)) > 0.01) {
+              onMetadataLoaded?.({ width: videoWidth, height: videoHeight, aspect });
+            }
           }
         }}
         onTimeUpdate={(e) => {
