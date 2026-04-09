@@ -152,13 +152,13 @@ const ColourGradePage = () => {
 
   return (
     <div className="animate-in fade-in duration-700">
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-12 gap-4">
         {/* Left Column (Presets & HSL) */}
-        <div className="col-span-12 lg:col-span-5 flex flex-col gap-6 order-2 lg:order-1">
+        <div className="col-span-12 lg:col-span-5 flex flex-col gap-4 order-2 lg:order-1">
           {/* Colour Grade Presets */}
-          <div className="bg-white rounded-3xl p-6 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0]">
-            <h2 className="text-xl font-bold text-charcoal mb-4">Colour grade presets</h2>
-            <div className="grid grid-cols-4 gap-3">
+          <div className="bg-white rounded-3xl p-4 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0]">
+            <h2 className="text-lg font-bold text-charcoal mb-2">Colour grade presets</h2>
+            <div className="grid grid-cols-4 gap-2">
               {COLOR_PRESETS.map((preset) => (
                 <button 
                   key={preset.id} 
@@ -203,39 +203,39 @@ const ColourGradePage = () => {
           </div>
 
           {/* HSL Adjustments */}
-          <div className="bg-white rounded-3xl p-6 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0]">
-            <h2 className="text-xl font-bold text-charcoal mb-4">HSL Adjustments</h2>
+          <div className="bg-white rounded-3xl p-4 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0]">
+            <h2 className="text-lg font-bold text-charcoal mb-2">HSL Adjustments</h2>
             
-            <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start">
+            <div className="flex flex-col lg:flex-row gap-4 items-center lg:items-start">
               {/* Interactive Color Wheel Section */}
-              <div className="relative shrink-0 flex items-center justify-center p-2">
+              <div className="relative shrink-0 flex items-center justify-center p-1">
                 <ColorWheel 
                   value={wheelColor}
                   onChange={(c) => updateHsl('hue', c.getChannelValue('hue'))}
-                  outerRadius={80}
-                  innerRadius={65}
+                  outerRadius={65}
+                  innerRadius={50}
                 >
-                  <ColorWheelTrack className="w-40 h-40 rounded-full" />
-                  <ColorThumb className="w-6 h-6 bg-white border-2 border-charcoal rounded-full shadow-lg focus-visible:ring-2 ring-primary cursor-pointer transition-transform active:scale-125 z-20" />
+                  <ColorWheelTrack className="w-32 h-32 rounded-full" />
+                  <ColorThumb className="w-5 h-5 bg-white border-2 border-charcoal rounded-full shadow-md focus-visible:ring-2 ring-primary cursor-pointer transition-transform active:scale-125 z-20" />
                 </ColorWheel>
                 
                 {/* Custom Zenxify Center Overlay - Perfectly Centered */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-2">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-1">
                    <div 
-                     className="w-[100px] h-[100px] bg-white rounded-full flex items-center justify-center shadow-md transition-colors"
+                     className="w-[80px] h-[80px] bg-white rounded-full flex items-center justify-center shadow-md transition-colors"
                      style={{ 
                        backgroundColor: `hsl(${color.hsl.hue}, ${color.hsl.saturation}%, ${(color.hsl.luminance / 2) + 50}%)` 
                      }}
                    >
                       <div className="w-[85%] h-[85%] rounded-full relative shadow-inner flex items-center justify-center mix-blend-overlay">
-                        <div className="absolute w-3 h-3 bg-white/40 rounded-full top-1/4 left-1/4" />
+                        <div className="absolute w-2 h-2 bg-white/40 rounded-full top-1/4 left-1/4" />
                       </div>
                    </div>
                 </div>
               </div>
 
               {/* HSL Sliders - Constrained to prevent overflow */}
-              <div className="flex-1 w-full  min-w-0 space-y-5">
+              <div className="flex-1 w-full min-w-0 space-y-2.5">
                 <Slider 
                   label="Hue" 
                   value={color.hsl.hue} 
@@ -270,8 +270,8 @@ const ColourGradePage = () => {
 
         {/* Middle Column (Basic Adjustments) */}
         <div className="col-span-12 lg:col-span-4 order-3 lg:order-2">
-          <div className="bg-white rounded-3xl p-6 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0] h-full">
-            <h2 className="text-xl font-bold text-charcoal mb-6">Basic Adjustments</h2>
+          <div className="bg-white rounded-3xl px-4 py-4 shadow-[1px_1px_5px_2px_rgba(0,0,0,0.2)] border border-[#e9e4f0]">
+            <h2 className="text-lg font-bold text-charcoal mb-4">Basic Adjustments</h2>
             <div className="space-y-4">
               <Slider 
                 label="Exposure" 
@@ -383,10 +383,10 @@ const Slider = ({ label, value, min = -100, max = 100, step, onChange, trackClas
   const percentage = ((value - min) / (max - min)) * 100;
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex justify-between items-center text-sm font-bold text-charcoal">
+    <div className="flex flex-col gap-1">
+      <div className="flex justify-between items-center text-xs font-bold text-charcoal">
         <span>{label}</span>
-        <span className="text-xs font-mono">
+        <span className="font-mono opacity-80">
           {value > 0 ? '+' : ''}
           {isDecimal ? value.toFixed(2) : value}
         </span>
