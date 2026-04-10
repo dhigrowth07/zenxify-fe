@@ -57,11 +57,12 @@ export const deleteAll = async () => {
  * @param {object} options
  * @param {string} options.token - Auth token (passed via query for SSE)
  * @param {(data: any) => void} options.onNotification
+ * @param {(data: any) => void} [options.onProgress]
  * @param {(event: any) => void} [options.onError]
  * @param {(event: any) => void} [options.onOpen]
  * @returns {() => void} - Function to close the stream.
  */
-export const initNotificationStream = ({ token, onNotification, onError, onOpen }) => {
+export const initNotificationStream = ({ token, onNotification, onProgress, onError, onOpen }) => {
     // Dynamically use current origin if API_URL is missing (handles different ports like 5000)
     const host = API_URL || window.location.origin;
     const sseUrl = `${host}${BASE_URL}/stream?token=${token}`;
@@ -82,6 +83,38 @@ export const initNotificationStream = ({ token, onNotification, onError, onOpen 
             if (onNotification) onNotification(data);
         } catch (err) {
             console.error("[SSE] Error parsing notification data:", err);
+        }
+    });
+
+    // Listen for progress updates
+    eventSource.addEventListener("job_progress", (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (onProgress) onProgress({ ...data, eventType: 'progress' });
+        } catch (err) {
+            console.error("[SSE] Error parsing progress data:", err);
+        }
+    });
+
+    // Listen for completion
+    eventSource.addEventListener("export_done", (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            console.log("[SSE] Export Success Event Received:", data);
+            if (onProgress) onProgress({ ...data, progress: 100, status: 'completed', eventType: 'done' });
+        } catch (err) {
+            console.error("[SSE] Error parsing export_done data:", err);
+        }
+    });
+
+    // Listen for failure
+    eventSource.addEventListener("job_failed", (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            console.warn("[SSE] Job Failure Event Received:", data);
+            if (onProgress) onProgress({ ...data, status: 'failed', eventType: 'failed' });
+        } catch (err) {
+            console.error("[SSE] Error parsing job_failed data:", err);
         }
     });
 

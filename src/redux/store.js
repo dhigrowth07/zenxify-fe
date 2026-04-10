@@ -7,6 +7,7 @@ import notificationReducer from "./notifications/notificationSlice";
 import projectReducer from "./projects/projectSlice";
 import billingReducer from "./billing/billingSlice";
 import editorReducer from "./editor/editorSlice";
+import exportReducer from "./export/exportSlice";
 
 const rootPersistConfig = {
   key: "root",
@@ -46,6 +47,7 @@ const rootReducer = combineReducers({
   projects: persistReducer(projectPersistConfig, projectReducer),
   billing: billingReducer,
   editor: editorReducer,
+  export: exportReducer,
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);
