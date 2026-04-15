@@ -65,7 +65,9 @@ export const deleteAll = async () => {
 export const initNotificationStream = ({ token, onNotification, onProgress, onError, onOpen }) => {
     // Dynamically use current origin if API_URL is missing (handles different ports like 5000)
     const host = API_URL || window.location.origin;
-    const sseUrl = `${host}${BASE_URL}/stream?token=${token}`;
+    const sseUrl = token 
+        ? `${host}${BASE_URL}/stream?token=${token}`
+        : `${host}${BASE_URL}/stream`;
     
     console.log("[SSE] Initializing stream at:", sseUrl);
     

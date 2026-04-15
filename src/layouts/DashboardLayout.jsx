@@ -24,9 +24,10 @@ const DashboardLayout = () => {
     // Initialize notifications and SSE stream
     useEffect(() => {
         console.log("[SSE] effect running. token present:", !!accessToken);
-        if (!accessToken) return;
-
-        // Fetch initial notifications
+        // Note: We no longer return early if accessToken is missing because 
+        // the backend can authenticate via HttpOnly cookies.
+        
+        // Fetch initial notifications if we have any auth indicator (or try regardless)
         /** @type {any} */ (dispatch)(fetchNotificationsAsync({ page: 1, limit: 20 }));
 
         // Init real-time stream

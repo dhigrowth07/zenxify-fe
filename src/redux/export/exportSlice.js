@@ -50,14 +50,16 @@ const exportSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(startExportAsync.pending, (state) => {
-                state.status = 'loading';
+                state.status = 'rendering';
+                state.progress = 5;
+                state.statusMessage = 'Initializing export request...';
                 state.error = null;
             })
             .addCase(startExportAsync.fulfilled, (state, action) => {
-                state.status = 'active';
+                state.status = 'rendering';
                 state.currentExport = action.payload;
-                state.progress = 10; // Initial queue progress
-                state.statusMessage = 'Job queued for rendering...';
+                state.progress = 10;
+                state.statusMessage = 'Source download initiated...';
             })
             .addCase(startExportAsync.rejected, (state, action) => {
                 state.status = 'failed';

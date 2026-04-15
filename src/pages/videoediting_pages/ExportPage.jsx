@@ -46,7 +46,19 @@ const ExportPage = () => {
   /** @type {any} */
   const editorState = useSelector((/** @type {any} */ state) => state.editor.editor);
 
+  const [isTriggering, setIsTriggering] = useState(false);
+
   const performRender = async () => {
+    if (isTriggering) return;
+    setIsTriggering(true);
+
+    // Instant UI feedback: Move to rendering state immediately
+    dispatch(updateExportProgress({
+      progress: 10,
+      message: "Initializing render...",
+      status: "rendering"
+    }));
+
     try {
       console.log("[ExportPage] Requesting Export Start...");
       await (/** @type {any} */ (dispatch(startExportAsync({
@@ -63,6 +75,10 @@ const ExportPage = () => {
     } catch (err) {
       console.error("[ExportPage] Export Trigger Failed:", err);
       toast.error(typeof err === 'string' ? err : "Failed to start export");
+      // Reset if it fails early
+      dispatch(resetExportState());
+    } finally {
+      setIsTriggering(false);
     }
   };
 
@@ -102,24 +118,17 @@ const ExportPage = () => {
       try {
         const res = await getProject(id);
         if (res?.data) {
+          console.group("[ExportPage] Syncing Project Data");
+          console.log("DB Status:", res.data.status);
+          console.log("Current Redux Status:", renderingStatus);
+          
           setProject(res.data);
-
-          // Debug logs for real-time verification
-          console.group("[ExportPage] Data Sync");
-          console.log("DB Project Status:", res.data.status);
-          console.log("Local Rendering Status:", renderingStatus);
-
-          // Force reset if DB says project is finished but UI thinks it's rendering
-          if (res.data.status !== 'exporting' && renderingStatus === 'rendering') {
-            console.log("State mismatch detected! Forcing reset to idle.");
-            dispatch(resetExportState());
-          }
 
           dispatch(loadProject({
             projectId: id,
             editor: res.data.editor_json || {},
-            sourceUrl: res.data.video_url?.startsWith('http')
-              ? res.data.video_url
+            sourceUrl: res.data.video_url?.startsWith('http') 
+              ? res.data.video_url 
               : `${API_URL}${res.data.video_url}`
           }));
 
@@ -128,27 +137,30 @@ const ExportPage = () => {
             fileName: res.data.title || "Untitled-1"
           }));
 
-          // Synchronize local export state with database status
+          // Handle local state sync
           if (res.data.status === 'exporting') {
-            dispatch(updateExportProgress({
-              progress: renderingStatus === 'rendering' ? progress : 10,
-              message: "Resuming export...",
-              status: "rendering"
-            }));
-          } else {
-            // If DB says we are NOT exporting, we must ensure local state isn't stuck in "rendering"
-            if (renderingStatus === 'rendering' || progress > 0 && progress < 100) {
-              console.log("[ExportPage] Project is not exporting. Clearing stale UI state.");
-              dispatch(resetExportState());
+            // Only set to 10% if we aren't already tracking an active render
+            if (renderingStatus !== 'rendering' && renderingStatus !== 'completed') {
+              console.log("Export in progress (DB). Transitioning UI to rendering.");
+              dispatch(updateExportProgress({
+                progress: 10,
+                message: "Resuming export...",
+                status: "rendering"
+              }));
             }
-
-            if (res.data.status === 'completed') {
+          } else if (res.data.status === 'completed') {
+            if (renderingStatus !== 'completed') {
+              console.log("Export finished (DB). Transitioning UI to completed.");
               dispatch(updateExportProgress({
                 progress: 100,
                 message: "Export completed!",
                 status: "completed"
               }));
             }
+          } else if (renderingStatus === 'rendering') {
+            // If DB says idle but UI says rendering, and it wasn't a fresh start, reset
+            console.warn("Status mismatch: DB is idle but UI is rendering. Resetting UI state.");
+            dispatch(resetExportState());
           }
           console.groupEnd();
         }
@@ -159,41 +171,44 @@ const ExportPage = () => {
       }
     };
     fetchProjectData();
-  }, [id, dispatch, renderingStatus]);
+  }, [id, dispatch]); // Removed renderingStatus dependency to break the update loop
 
   // LISTEN FOR PROGRESS
   useEffect(() => {
-    if (!accessToken || !id) return;
+    // Note: We remove !accessToken check here because the backend 
+    // can authenticate via cookies if the token is missing from Redux state.
+    if (!id) return;
 
+    console.log("[SSE] Opening stream for project:", id);
     const closeStream = initNotificationStream({
-      token: accessToken,
+      token: accessToken, // Still pass it if available, backend handles fallback
       onNotification: (data) => console.log("[SSE] Global Notification:", data),
       onProgress: (/** @type {any} */ payload) => {
-        console.group("[SSE] Progress Event Received");
+        console.group("[SSE] Update Received");
         console.log("Payload:", payload);
-        console.log("Target Project ID:", id);
+        console.log("Current Page ID:", id);
+        
+        // Ensure ID match (case-insensitive for safety)
+        const isMatch = String(payload.projectId).toLowerCase() === String(id).toLowerCase();
+        console.log("ID Match:", isMatch);
 
-        if (payload.projectId === id) {
-          console.log("Status Transition:", renderingStatus, "->", payload.status);
-
+        if (isMatch) {
+          console.log("Executing State Update...");
           dispatch(updateExportProgress({
             progress: payload.progress || 0,
             message: payload.message || (payload.eventType === 'done' ? "Export finished!" : "Rendering..."),
-            status: payload.status === 'completed' ? 'completed' : 'rendering'
+            status: (payload.status === 'completed' || payload.eventType === 'done') ? 'completed' : 'rendering'
           }));
 
           if (payload.status === 'completed' || payload.progress >= 100 || payload.eventType === 'done') {
-            console.log("SUCCESS detected. Updating project data...");
-            // Fetch latest project data once to get the download URL
+            console.log("SUCCESS DETECTED. Fetching final project data...");
             getProject(id).then(res => {
               if (res?.data) {
-                console.log("Retrieved updated project data with download URL");
+                console.log("Project data refreshed successfully.");
                 setProject(res.data);
               }
             });
           }
-        } else {
-          console.log("Event ignored (Mismatched Project ID)");
         }
         console.groupEnd();
       }
@@ -333,18 +348,18 @@ const ExportPage = () => {
                   <div className="flex flex-col gap-3">
                     <button
                       onClick={handleExport}
-                      disabled={renderingStatus === "loading"}
+                      disabled={renderingStatus === "loading" || isTriggering}
                       className={cn(
                         "w-full bg-brand-gradient py-5 rounded-[20px] text-white font-black text-lg shadow-2xl shadow-primary/30 transition-all flex items-center justify-center gap-3 group",
-                        renderingStatus === "loading" ? "opacity-70 cursor-not-allowed translate-y-0" : "hover:shadow-primary/40 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98]"
+                        (renderingStatus === "loading" || isTriggering) ? "opacity-70 cursor-not-allowed translate-y-0" : "hover:shadow-primary/40 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98]"
                       )}
                     >
-                      {renderingStatus === "loading" ? (
+                      {renderingStatus === "loading" || isTriggering ? (
                         <Loader2 className="animate-spin" />
                       ) : (
                         <Download className="group-hover:animate-bounce" />
                       )}
-                      {renderingStatus === "loading"
+                      {renderingStatus === "loading" || isTriggering
                         ? "Initializing..."
                         : renderingStatus === "completed"
                           ? "Download Exported Video"
