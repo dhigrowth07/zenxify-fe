@@ -17,6 +17,7 @@ import { setIsPlaying, setPreviewTime } from '../../redux/editor/editorSlice';
 const VideoPreview = ({ 
   project, 
   actionButton, 
+  children,
   title = "Preview", 
   className 
 }) => {
@@ -129,6 +130,7 @@ const VideoPreview = ({
           />
         </div>
         {actionButton}
+        {children}
       </div>
 
       <VideoModal 

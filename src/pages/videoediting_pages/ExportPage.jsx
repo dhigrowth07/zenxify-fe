@@ -119,22 +119,39 @@ const ExportPage = () => {
         const res = await getProject(id);
         if (res?.data) {
           console.group("[ExportPage] Syncing Project Data");
-          console.log("DB Status:", res.data.status);
+          const projectData = res.data;
+          console.log("DB Status:", projectData.status);
           console.log("Current Redux Status:", renderingStatus);
           
-          setProject(res.data);
+          let finalSourceUrl = projectData.video_url?.startsWith('http') 
+            ? projectData.video_url 
+            : `${API_URL}${projectData.video_url}`;
+
+          // If a merged cut exists, we MUST use it for the final export preview
+          if (projectData.merged_s3_key) {
+            try {
+              const presignRes = await api.get('/api/storage/presign/download', { 
+                params: { s3Key: projectData.merged_s3_key } 
+              });
+              if (presignRes.data?.data?.downloadUrl) {
+                finalSourceUrl = presignRes.data.data.downloadUrl;
+              }
+            } catch (e) {
+              console.error("Failed to presign merged video for export:", e);
+            }
+          }
+
+          setProject(projectData);
 
           dispatch(loadProject({
             projectId: id,
-            editor: res.data.editor_json || {},
-            sourceUrl: res.data.video_url?.startsWith('http') 
-              ? res.data.video_url 
-              : `${API_URL}${res.data.video_url}`
+            editor: projectData.editor_json || {},
+            sourceUrl: finalSourceUrl
           }));
 
           setExportSettings(prev => ({
             ...prev,
-            fileName: res.data.title || "Untitled-1"
+            fileName: projectData.title || "Untitled-1"
           }));
 
           // Handle local state sync

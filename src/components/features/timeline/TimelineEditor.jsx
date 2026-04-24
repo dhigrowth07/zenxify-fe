@@ -27,7 +27,7 @@ const THEME = {
     text: '#868A91'
 };
 
-const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
+const TimelineEditor = ({ data: externalData, projectId: propProjectId, previewMode = 'editor' }) => {
     const dispatch = useDispatch();
     const isPlaying = useSelector((state) => state.editor.isPlaying);
     const previewTime = useSelector((state) => state.editor.previewTime);
@@ -44,21 +44,21 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
     
     // CALCULATE DYNAMIC VISUAL DURATION
     const visualTotalDuration = useMemo(() => {
-        const masterSegments = data[0]?.actions || [];
-        if (!hideCuts) {
+        // If we want to see gaps, we use the master duration
+        if (previewMode === 'final' || !hideCuts) {
             let max = 0;
-            masterSegments.forEach(a => { if (a.end > max) max = a.end; });
+            data[0]?.actions?.forEach(a => { if (a.end > max) max = a.end; });
             return Math.max(totalDuration, max, 30);
         }
         
         let sum = 0;
-        masterSegments.forEach(action => {
+        data[0]?.actions?.forEach(action => {
             if (action.data?.is_kept !== false) {
                 sum += (action.end - action.start);
             }
         });
         return Math.max(sum, 1);
-    }, [data, hideCuts, totalDuration]);
+    }, [data, hideCuts, totalDuration, previewMode]);
     const [history, setHistory] = useState([externalData || []]);
     const [historyIndex, setHistoryIndex] = useState(0);
 
@@ -79,7 +79,7 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
         const total = data[0]?.actions?.length || 0;
         const kept = data[0]?.actions?.filter(a => a.data?.is_kept !== false).length || 0;
         
-        console.log(`[DRAFT] Auto-saving: ${total} total, ${kept} kept.`);
+
         localStorage.setItem(draftKey, JSON.stringify(data));
     }, [data, projectId]);
 
@@ -94,7 +94,6 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
             try {
                 const parsed = JSON.parse(savedDraft);
                 const keptCount = parsed[0]?.actions?.filter(a => a.data?.is_kept !== false).length || 0;
-                console.log(`[DRAFT] Found local draft for ${projectId} (${keptCount} kept segments). Restoring...`);
                 setData(parsed);
                 dispatch(setVadSegments(parsed));
             } catch (e) {
@@ -102,7 +101,6 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
                 if (externalData?.length > 0) setData(externalData);
             }
         } else if (externalData?.length > 0) {
-            console.log(`[DRAFT] No local draft for ${projectId}. Using initial server data.`);
             setData(externalData);
         }
         
@@ -112,7 +110,7 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
 
     // [GAPLESS PLAYBACK SKIP LOGIC - VERSION 2 (GAP-AWARE)]
     useEffect(() => {
-        if (!isPlaying || !hideCuts) return;
+        if (!isPlaying || !hideCuts || previewMode === 'final') return;
         
         const keptSegments = data[0]?.actions.filter(a => a.data?.is_kept !== false).sort((a, b) => a.start - b.start) || [];
         
@@ -338,20 +336,35 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
         let time = 0;
         const visualPos = clickX / pixelsPerSecond;
 
-        if (hideCuts) {
-            // Convert visual position back to absolute time
+        if (previewMode === 'final') {
+            // Mapping from visual click to physical time (for seeking the video)
             let visualAcc = 0;
             const keptSegments = data[0]?.actions.filter(a => a.data?.is_kept !== false).sort((a,b) => a.start - b.start) || [];
+            
+            // If user clicked a gap in final mode, we jump to the nearest kept start
             for (const a of keptSegments) {
                 const dur = a.end - a.start;
-                if (visualPos >= visualAcc && visualPos < visualAcc + dur) {
-                    time = a.start + (visualPos - visualAcc);
-                    break;
+                // Since final mode timeline in this implementation is ABSOLUTE (user wants gaps),
+                // we treat a click like a normal seek, but we must translate for the video player.
+                // Wait, if we want to show GAPS, visualPos IS AbsoluteTime.
+                const absoluteClick = visualPos;
+                
+                // Translate Absolute Click -> Visual Time for the player
+                let playerVisualTime = 0;
+                for (const seg of keptSegments) {
+                    if (absoluteClick >= seg.end) {
+                        playerVisualTime += (seg.end - seg.start);
+                    } else if (absoluteClick >= seg.start && absoluteClick < seg.end) {
+                        playerVisualTime += (absoluteClick - seg.start);
+                        time = playerVisualTime;
+                        break;
+                    } else if (absoluteClick < seg.start) {
+                        time = playerVisualTime; // Snap to start of next
+                        break;
+                    }
                 }
-                visualAcc += dur;
-                time = a.end; // Default to end of last segment
             }
-        } else {
+        } else if (hideCuts) {
             time = visualPos;
         }
 
@@ -361,6 +374,21 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
 
     // Calculates where a time should appear visually on the timeline
     const getVisualTime = useCallback((time) => {
+        // If we ARE in final mode, the playhead time (from Redux) is the SHORT visual time.
+        // To show it on an ABSOLUTE timeline with Gaps, we must translate SHORT -> LONG
+        if (previewMode === 'final') {
+            let visualAcc = 0;
+            const keptSegments = data[0]?.actions.filter(a => a.data?.is_kept !== false).sort((a,b) => a.start - b.start) || [];
+            for (const a of keptSegments) {
+                const dur = a.end - a.start;
+                if (time >= visualAcc && time <= visualAcc + dur) {
+                    return a.start + (time - visualAcc);
+                }
+                visualAcc += dur;
+            }
+            return visualAcc;
+        }
+
         if (!hideCuts) return time;
         
         let visualTime = 0;
@@ -383,46 +411,54 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
     return (
         <div className="flex flex-col flex-1 min-h-0 bg-[#111214] select-none text-[#868A91] font-['Outfit'] overflow-hidden">
             {/* ROW 1: MASTER TOOLS */}
-            <div className="h-[32px] flex items-center justify-between px-3 bg-[#111214] border-b border-black">
-                <div className="flex items-center gap-0.5">
-                    <ToolbarButton icon={<Undo2 size={11} />} title="Undo" onClick={performUndo} disabled={historyIndex === 0} showLabel />
-                    <ToolbarButton icon={<Redo2 size={11} />} title="Redo" onClick={performRedo} disabled={historyIndex === history.length - 1} showLabel />
-                    <ToolbarButton 
-                        icon={<RotateCcw size={11} />} 
-                        title="Reset" 
-                        onClick={() => setShowResetConfirm(true)} 
-                        showLabel 
-                    />
-                </div>
+            {/* EDITOR TOOLBAR - HIDE IN FINAL MODE */}
+            {previewMode !== 'final' && (
+                <div className="h-[32px] flex items-center justify-between px-3 bg-[#111214] border-b border-black">
+                    <div className="flex items-center gap-0.5">
+                        <ToolbarButton icon={<Undo2 size={11} />} title="Undo" onClick={performUndo} disabled={historyIndex === 0} showLabel />
+                        <ToolbarButton icon={<Redo2 size={11} />} title="Redo" onClick={performRedo} disabled={historyIndex === history.length - 1} showLabel />
+                        <ToolbarButton 
+                            icon={<RotateCcw size={11} />} 
+                            title="Reset" 
+                            onClick={() => setShowResetConfirm(true)} 
+                            showLabel 
+                        />
+                    </div>
 
-                <div className="flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2">
-                    <ToolbarButton icon={<Scissors size={11} />} title="Cut" showLabel onClick={() => selectedActionId && toggleSegment(selectedActionId, false)} />
-                    <ToolbarButton icon={<Split size={11} />} title="Split" showLabel onClick={handleSplit} />
-                    <ToolbarButton icon={<Trash2 size={11} />} title="Delete" showLabel onClick={() => selectedActionId && handleDataChange(data.map(t => ({...t, actions: t.actions.filter(a => a.id !== selectedActionId)})))} disabled={!selectedActionId} />
-                </div>
+                    <div className="flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2">
+                        <ToolbarButton icon={<Scissors size={11} />} title="Cut" showLabel onClick={() => selectedActionId && toggleSegment(selectedActionId, false)} />
+                        <ToolbarButton icon={<Split size={11} />} title="Split" showLabel onClick={handleSplit} />
+                        <ToolbarButton icon={<Trash2 size={11} />} title="Delete" showLabel onClick={() => selectedActionId && handleDataChange(data.map(t => ({...t, actions: t.actions.filter(a => a.id !== selectedActionId)})))} disabled={!selectedActionId} />
+                    </div>
 
-                <div className="flex items-center gap-0.5">
-                    <ToolbarButton 
-                        icon={<Scissors size={11} />} 
-                        title="Silence" 
-                        showLabel 
-                        onClick={toggleAllSilences} 
-                        active={data.some(t => t.actions?.some(a => {
-                            const label = (a.text || a.data?.review_note || '').toLowerCase();
-                            const id = (a.id || '').toLowerCase();
-                            const isActuallySilence = label.includes('silence') || label.includes('breath') || label.includes('filler') || label.includes('short') || id.includes('silence');
-                            return isActuallySilence && a.data?.is_kept !== false;
-                        }))} 
-                    />
-                    <ToolbarButton icon={<Eye size={11} />} title="Cuts" showLabel onClick={() => setHideCuts(!hideCuts)} active={hideCuts} />
+                    <div className="flex items-center gap-0.5">
+                        <ToolbarButton 
+                            icon={<Scissors size={11} />} 
+                            title="Silence" 
+                            showLabel 
+                            onClick={toggleAllSilences} 
+                            active={data.some(t => t.actions?.some(a => {
+                                const label = (a.text || a.data?.review_note || '').toLowerCase();
+                                const id = (a.id || '').toLowerCase();
+                                const isActuallySilence = label.includes('silence') || label.includes('breath') || label.includes('filler') || label.includes('short') || id.includes('silence');
+                                return isActuallySilence && a.data?.is_kept !== false;
+                            }))} 
+                        />
+                        <ToolbarButton icon={<Eye size={11} />} title="Cuts" showLabel onClick={() => setHideCuts(!hideCuts)} active={hideCuts} />
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* ROW 2: TRANSPORT & ZOOM */}
             <div className="h-[48px] flex items-center justify-between px-3 bg-[#1E1F22] border-b border-black">
                 {/* TIMECODE BOX */}
                 <div className="flex items-center bg-black/40 px-5 py-2.5 rounded-xl border border-white/5 backdrop-blur-md shadow-inner">
-                    <TimeIndicator data={data} hideCuts={hideCuts} totalDuration={visualTotalDuration} />
+                    <TimeIndicator 
+                        data={data} 
+                        hideCuts={hideCuts} 
+                        totalDuration={visualTotalDuration} 
+                        previewMode={previewMode}
+                    />
                 </div>
 
                 {/* CENTER TRANSPORT */}
@@ -524,12 +560,14 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
                             return (
                                 <div key={track.id} className="h-15 border-b border-black/30 relative flex items-center">
                                     {track.actions?.map((action, idx) => {
-                                        if (hideCuts && action.data?.is_kept === false) return null;
+                                        const isKept = action.data?.is_kept !== false;
+                                        if (hideCuts && !isKept) return null;
                                         return (
                                             <SegmentBlock key={action.id} action={action} pps={pixelsPerSecond} index={idx + 1}
                                                 isSelected={selectedActionId === action.id} onSelect={() => setSelectedActionId(action.id)}
                                                 onTrimStart={startTrim} onToggle={toggleSegment} onSeek={(t) => dispatch(setPreviewTime(t))}
-                                                getVisualTime={getVisualTime} hideCuts={hideCuts} />
+                                                getVisualTime={getVisualTime} hideCuts={hideCuts} 
+                                                previewMode={previewMode} />
                                         );
                                     })}
                                 </div>
@@ -564,7 +602,7 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId }) => {
     );
 };
 
-const SegmentBlock = ({ action, pps, index, isSelected, onSelect, onTrimStart, onToggle, onSeek, getVisualTime, hideCuts }) => {
+const SegmentBlock = ({ action, pps, index, isSelected, onSelect, onTrimStart, onToggle, onSeek, getVisualTime, hideCuts, previewMode }) => {
     const isVoice = action.effectId === 'audio';
     const isKept = action.data?.is_kept !== false;
     
@@ -601,8 +639,8 @@ const SegmentBlock = ({ action, pps, index, isSelected, onSelect, onTrimStart, o
             <div className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/10 z-20" onMouseDown={(e) => onTrimStart(e, action.id, 'left')} />
             <div className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/10 z-20" onMouseDown={(e) => onTrimStart(e, action.id, 'right')} />
 
-            {/* QUICK ACTIONS - ONLY FOR VIDEO TRACK */}
-            {!isVoice && (
+            {/* QUICK ACTIONS - ONLY FOR VIDEO TRACK - DISABLE IN FINAL MODE */}
+            {!isVoice && previewMode !== 'final' && (
                 <div className="absolute inset-x-0 bottom-0 p-0.5 opacity-0 group-hover:opacity-100 transition-all z-30">
                     <button onClick={(e) => { e.stopPropagation(); onToggle(action.id, !isKept); }} className={`w-full py-0.5 rounded-[2px] text-[6px] font-black uppercase text-white ${isKept ? 'bg-rose-500/80' : 'bg-[#50E3C2]/80 text-black'}`}>
                         {isKept ? 'Remove' : 'Restore'}
@@ -641,11 +679,13 @@ const Playhead = ({ pixelsPerSecond, isPlaying, containerRef, getVisualTime }) =
 };
 
 // DYNAMIC TIME INDICATOR
-const TimeIndicator = ({ data, hideCuts, totalDuration }) => {
+const TimeIndicator = ({ data, hideCuts, totalDuration, previewMode }) => {
     const previewTime = useSelector((state) => state.editor.previewTime);
     
     // Calculate accurate visual total duration (sum of kept segments)
     const visualTotalDuration = useMemo(() => {
+        if (previewMode === 'final' || !hideCuts) return totalDuration;
+
         const masterSegments = data[0]?.actions || [];
         const kept = masterSegments.filter(a => a.data?.is_kept !== false);
         
@@ -657,10 +697,14 @@ const TimeIndicator = ({ data, hideCuts, totalDuration }) => {
         });
         
         return sum;
-    }, [data, hideCuts, totalDuration]);
+    }, [data, hideCuts, totalDuration, previewMode]);
 
     // Calculate accurate visual current time
     const visualCurrentTime = useMemo(() => {
+        // In final mode, the timeline is absolute. The playhead represents the visual time.
+        // But for the "Indicator" text, maybe we should show the visual time of the video?
+        // User wants the indicator to be proper - usually means the time of the file playing.
+        if (previewMode === 'final') return previewTime; 
         if (!hideCuts) return previewTime;
         
         let visualTime = 0;
@@ -676,7 +720,7 @@ const TimeIndicator = ({ data, hideCuts, totalDuration }) => {
             }
         }
         return visualTime;
-    }, [data, hideCuts, previewTime]);
+    }, [data, hideCuts, previewTime, previewMode]);
 
     return (
         <div className="flex items-center gap-3 font-mono">

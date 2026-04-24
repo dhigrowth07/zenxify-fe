@@ -26,6 +26,7 @@ import {
 } from '../../redux/editor/editorSlice';
 import { API_URL } from '../../config/envConfig';
 import { useAutoSave } from '../../hooks/useAutoSave';
+import api from '../../services/api';
 
 const COLOR_PRESETS = [
   {
@@ -124,13 +125,31 @@ const ColourGradePage = () => {
       try {
         const res = await getProject(id);
         if (res?.data) {
-          setProject(res.data);
+          const projectData = res.data;
+          
+          let finalSourceUrl = projectData.video_url?.startsWith('http')
+            ? projectData.video_url
+            : `${API_URL}${projectData.video_url}`;
+
+          // If a merged cut exists, we MUST use it for color grading
+          if (projectData.merged_s3_key) {
+            try {
+              const presignRes = await api.get('/api/storage/presign/download', { 
+                params: { s3Key: projectData.merged_s3_key } 
+              });
+              if (presignRes.data?.data?.downloadUrl) {
+                finalSourceUrl = presignRes.data.data.downloadUrl;
+              }
+            } catch (e) {
+              console.error("Failed to presign merged video:", e);
+            }
+          }
+
+          setProject(projectData);
           dispatch(loadProject({
             projectId: id,
-            editor: res.data.editor_json || {},
-            sourceUrl: res.data.video_url?.startsWith('http')
-              ? res.data.video_url
-              : `${API_URL}${res.data.video_url}`
+            editor: projectData.editor_json || {},
+            sourceUrl: finalSourceUrl
           }));
         }
       } catch (err) {

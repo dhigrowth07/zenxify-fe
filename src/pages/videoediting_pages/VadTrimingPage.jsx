@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Settings, Mic, Zap, Wind, Video, Music, AlertCircle, Box } from 'lucide-react';
+import { Settings, Mic, Zap, Wind, Video, Music, AlertCircle, Box, Play } from 'lucide-react';
 import VideoPreview from '../../components/shared/VideoPreview';
 import { useTheme } from '../../hooks/useTheme';
 import { toast } from '../../utils/toastHandler';
@@ -44,6 +44,7 @@ const VadTrimingPage = () => {
     const [project, setProject] = useState(null);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [previewMode, setPreviewMode] = useState('editor'); // 'editor' | 'final'
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState("");
 
@@ -252,6 +253,29 @@ const VadTrimingPage = () => {
         }
     };
 
+    const togglePreviewMode = () => {
+        if (!project?.processedVideoUrl) return;
+        
+        const nextMode = previewMode === 'editor' ? 'final' : 'editor';
+        setPreviewMode(nextMode);
+        
+        // Update Redux sourceUrl to swap the video in PreviewEngine
+        const nextUrl = nextMode === 'final' 
+            ? project.processedVideoUrl 
+            : (project.videoUrl || project.project?.video_url || `${API_URL}${project.project?.video_url}`);
+
+        dispatch(loadProject({
+            projectId: id,
+            editor: project.project?.editor_json || {},
+            sourceUrl: nextUrl
+        }));
+
+        toast.info(
+            nextMode === 'final' ? "Mode: Final Result" : "Mode: Editor",
+            nextMode === 'final' ? "Previewing the merged video." : "Back to your workspace."
+        );
+    };
+
     // Transform VAD segments for the Timeline Editor
     const timelineData = useMemo(() => {
         if (!project) return null;
@@ -298,6 +322,7 @@ const VadTrimingPage = () => {
             </div>
         );
     }
+
 
     return (
         <div className="bg-[#f3f4f6] p-4 md:px-8 pt-0 font-sans fade-in">
@@ -384,12 +409,56 @@ const VadTrimingPage = () => {
                         <div className="space-y-4 pt-6 border-t border-gray-100">
                             <div className="flex items-center justify-between px-6">
                                 <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Multi-Track Editor</h3>
+                                
+                                {project?.processedVideoUrl && (
+                                    <button 
+                                        onClick={togglePreviewMode}
+                                        className={`flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all active:scale-95
+                                            ${previewMode === 'final' 
+                                                ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20' 
+                                                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+                                            }`}
+                                    >
+                                        {previewMode === 'final' ? (
+                                            <>
+                                                <Settings size={10} />
+                                                Editor
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Play size={10} fill="currentColor" />
+                                                Final Result
+                                            </>
+                                        )}
+                                    </button>
+                                )}
                             </div>
 
-                            <div className={`bg-[#f9fafb] border-y border-gray-100 overflow-hidden min-h-[160px] relative transition-colors duration-300 ${!isDark ? 'twick-light bg-white' : 'bg-[#141419]'}`}>
-                                {timelineData ? (
+                            <div className={`bg-[#f9fafb] border-y border-gray-100 overflow-hidden min-h-[220px] relative transition-colors duration-300 ${!isDark ? 'twick-light bg-white' : 'bg-[#141419]'}`}>
+                                {vadStatus === 'running' ? (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                                        <div className="w-12 h-12 border-4 border-[#d900ff]/20 border-t-[#d900ff] rounded-full animate-spin mb-4"></div>
+                                        <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">AI analyzing your video...</p>
+                                        <p className="text-[10px] text-gray-400 mt-2">We're detecting speech patterns and silence gaps.</p>
+                                    </div>
+                                ) : (!segments || segments.length === 0) ? (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-700">
+                                        <div className="relative mb-6">
+                                            <div className="absolute inset-0 bg-[#d900ff]/10 blur-2xl rounded-full"></div>
+                                            <Mic size={48} className="text-[#d900ff] opacity-40 relative z-10" />
+                                        </div>
+                                        <h3 className="text-lg font-black text-gray-800 mb-2">Rough Cut Not Ready</h3>
+                                        <p className="text-xs text-gray-500 max-w-[280px] leading-relaxed">
+                                            Please trigger the <span className="text-[#d900ff] font-bold">Run Analysis</span> button above to automatically detect silences and generate your segments.
+                                        </p>
+                                    </div>
+                                ) : timelineData ? (
                                     <div className="flex flex-col h-full">
-                                        <TimelineEditor data={timelineData} projectId={id} />
+                                        <TimelineEditor 
+                                            data={timelineData} 
+                                            projectId={id} 
+                                            previewMode={previewMode}
+                                        />
                                     </div>
                                 ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-gray-400">
@@ -443,7 +512,9 @@ const VadTrimingPage = () => {
                                 </div>
                             </button>
                         }
-                    />
+                    >
+                        {/* SECONDARY ACTION: WATCH FINAL RESULT */}
+                    </VideoPreview>
                 </div>
 
             </div>
