@@ -22,6 +22,7 @@ import BillingPage from './pages/settings/BillingPage';
 import ColourGradePage from './pages/videoediting_pages/ColourGradePage';
 import ExportPage from './pages/videoediting_pages/ExportPage';
 import VadTrimingPage from './pages/videoediting_pages/VadTrimingPage';
+import SfxPage from './pages/videoediting_pages/SfxPage';
 
 const Router = () => {
     return (
@@ -49,6 +50,7 @@ const Router = () => {
                             <Route path="/video-editor/upload" element={<VideoUploadPage />} />
                             <Route path="/video-editor/vad-triming/:id" element={<VadTrimingPage />} />
                             <Route path="/video-editor/grade/:id" element={<ColourGradePage />} />
+                            <Route path="/video-editor/sfx/:id" element={<SfxPage />} />
                             <Route path="/video-editor/export/:id" element={<ExportPage />} />
                             {/* Other editing steps would go here */}
                         </Route>

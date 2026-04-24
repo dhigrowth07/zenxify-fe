@@ -211,8 +211,36 @@ const VadTrimingPage = () => {
                 };
             });
 
-            // 1. Sync the metadata first
+            // 1. Prepare and Sync the metadata
+            const trimSegments = sourceArray.map(item => {
+                // Timeline actions use 'start'/'end', flat segments might use 'start_sec'/'end_sec'
+                const start = item.start !== undefined ? item.start : parseFloat(item.start_sec || 0);
+                const end = item.end !== undefined ? item.end : parseFloat(item.end_sec || 0);
+                const isKept = item.data ? item.data?.is_kept !== false : item.is_kept !== false;
+                const segmentIndex = item.data ? (item.data?.segment_index || 0) : (item.segment_index || 0);
+
+                return {
+                    id: item.id,
+                    start,
+                    end,
+                    is_kept: isKept,
+                    segment_index: segmentIndex,
+                    text: item.text || item.data?.text || ""
+                };
+            });
+
+            // Sync legacy segments list
             await updateSegments(id, changes);
+            
+            // Sync rich editor_json state
+            const updatedEditorJson = {
+                ...(project?.project?.editor_json || project?.editor_json || {}),
+                trim: {
+                    segments: trimSegments
+                }
+            };
+            await api.patch(`/api/projects/${id}`, { editor_json: updatedEditorJson });
+
             setProgress(35);
             setProgressMessage("Queuing merge job...");
             
