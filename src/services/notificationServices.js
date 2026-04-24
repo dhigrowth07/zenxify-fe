@@ -109,6 +109,27 @@ export const initNotificationStream = ({ token, onNotification, onProgress, onEr
         }
     });
 
+    // Listen for VAD completion
+    eventSource.addEventListener("vad_done", (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            console.log("[SSE] VAD Success Event Received:", data);
+            if (onNotification) onNotification({ ...data, type: 'vad_done' });
+        } catch (err) {
+            console.error("[SSE] Error parsing vad_done data:", err);
+        }
+    });
+
+    eventSource.addEventListener("vad_complete", (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            console.log("[SSE] VAD Completion Event Received:", data);
+            if (onNotification) onNotification({ ...data, type: 'vad_complete' });
+        } catch (err) {
+            console.error("[SSE] Error parsing vad_complete data:", err);
+        }
+    });
+
     // Listen for failure
     eventSource.addEventListener("job_failed", (event) => {
         try {

@@ -1,18 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { defaultEditorState } from "./editorSchema";
+import { vadInitialState } from "./parts/vadSlice";
 
 const editorSlice = createSlice({
   name: "editor",
 
   initialState: {
-    editor:    defaultEditorState,
+    editor: defaultEditorState,
     projectId: null,
     sourceUrl: null, // The absolute URL of the source video
-    isDirty:   false,
+    isDirty: false,
     previewTime: 0,
-    isPlaying:   false,
-    isLoading:   false,
-    error:       null
+    isPlaying: false,
+    isLoading: false,
+    error: null,
+    // VAD specific state node
+    vad: vadInitialState
   },
 
   reducers: {
@@ -21,10 +24,10 @@ const editorSlice = createSlice({
      * Resets dirtiness and initializes the editor state.
      */
     loadProject: (state, action) => {
-      state.editor    = { ...defaultEditorState, ...action.payload.editor };
+      state.editor = { ...defaultEditorState, ...action.payload.editor };
       state.projectId = action.payload.projectId;
       state.sourceUrl = action.payload.sourceUrl || null;
-      state.isDirty   = false;
+      state.isDirty = false;
       state.isLoading = false;
     },
 
@@ -46,9 +49,9 @@ const editorSlice = createSlice({
      * Marks the state as dirty to trigger auto-save.
      */
     setColor: (state, action) => {
-      state.editor.color = { 
-        ...state.editor.color, 
-        ...action.payload 
+      state.editor.color = {
+        ...state.editor.color,
+        ...action.payload
       };
       state.isDirty = true;
     },
@@ -92,12 +95,39 @@ const editorSlice = createSlice({
       state.isDirty = true;
     },
 
+    setProjectJson: (state, action) => {
+      state.editor.projectJson = action.payload;
+      state.isDirty = true;
+    },
+
     setPreviewTime: (state, action) => {
       state.previewTime = action.payload;
     },
 
     setIsPlaying: (state, action) => {
       state.isPlaying = action.payload;
+    },
+
+    setVadSegments: (state, action) => {
+      state.vad.segments = action.payload;
+      state.vad.status = "success";
+    },
+
+    updateVadConfig: (state, action) => {
+      state.vad.config = { ...state.vad.config, ...action.payload };
+    },
+
+    setVadStatus: (state, action) => {
+      state.vad.status = action.payload;
+    },
+
+    setVadError: (state, action) => {
+      state.vad.error = action.payload;
+      state.vad.status = "failed";
+    },
+
+    setVadStats: (state, action) => {
+      state.vad.stats = { ...state.vad.stats, ...action.payload };
     },
 
     /**
@@ -110,19 +140,25 @@ const editorSlice = createSlice({
 });
 
 export const {
-  loadProject, 
+  loadProject,
   setEditorLoading,
   setEditorError,
-  setColor, 
+  setColor,
   setHsl,
-  setTrim, 
+  setTrim,
   setCaptions,
-  setBroll, 
-  setTransitions, 
+  setBroll,
+  setTransitions,
   setAudio,
+  setProjectJson,
   setSourceUrl,
-  setPreviewTime, 
+  setPreviewTime,
   setIsPlaying,
+  setVadSegments,
+  updateVadConfig,
+  setVadStatus,
+  setVadError,
+  setVadStats,
   markSaved
 } = editorSlice.actions;
 

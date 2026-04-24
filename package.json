@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
+    "@wavesurfer/react": "^1.0.12",
+    "@xzdarcy/react-timeline-editor": "^1.0.0",
+    "@xzdarcy/timeline-engine": "^1.0.0",
     "axios": "^1.13.6",
     "buffer": "^6.0.3",
     "clsx": "^2.1.1",
@@ -27,9 +30,11 @@
     "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.0",
+    "react-voice-visualizer": "^2.1.0",
     "redux-persist": "^6.0.0",
     "sileo": "^0.1.0",
-    "tailwind-merge": "^3.4.1"
+    "tailwind-merge": "^3.4.1",
+    "wavesurfer.js": "^7.12.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

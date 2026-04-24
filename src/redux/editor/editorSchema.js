@@ -7,24 +7,24 @@
 export const defaultEditorState = {
   // Trim settings: defines what parts of the source video are kept
   trim: {
-    segments: [] 
+    segments: []
     // Format: { start: number, end: number }
   },
 
   // Color grading settings: values match GLSL shader and FFmpeg filters
   color: {
-    exposure:    0,    // -1 to 1
-    contrast:    1,    // 0.5 to 2
-    saturation:  1,    // 0 to 3
-    vibrance:    0,    // -1 to 1
+    exposure: 0,    // -1 to 1
+    contrast: 1,    // 0.5 to 2
+    saturation: 1,    // 0 to 3
+    vibrance: 0,    // -1 to 1
     temperature: 0,    // -100 to 100
-    tint:        0,    // -100 to 100
-    highlights:  0,    // -100 to 100
-    shadows:     0,    // -100 to 100
-    whites:      0,    // -100 to 100
-    blacks:      0,    // -100 to 100
-    clarity:     0,    // -100 to 100
-    hue:         0,     // -180 to 180
+    tint: 0,    // -100 to 100
+    highlights: 0,    // -100 to 100
+    shadows: 0,    // -100 to 100
+    whites: 0,    // -100 to 100
+    blacks: 0,    // -100 to 100
+    clarity: 0,    // -100 to 100
+    hue: 0,     // -180 to 180
     hsl: {
       hue: 0,
       saturation: 0,
@@ -46,8 +46,17 @@ export const defaultEditorState = {
 
   // Audio settings
   audio: {
-    bgm:    null,
+    bgm: null,
     volume: 1,
-    duck:   true
+    duck: true
+  },
+
+  // Twick SDK Project Model (Added for timeline support)
+  // This will be populated by transformZenxifyToTwick utility
+  projectJson: {
+    version: 1,
+    tracks: [
+      { id: 'track-video-1', type: 'video', name: 'Main Video', elements: [] }
+    ]
   }
 };

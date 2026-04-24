@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    Search, 
-    Plus, 
-    MoreVertical, 
-    Edit2, 
-    Trash2, 
-    Copy, 
-    Clock, 
-    CheckCircle2, 
-    AlertCircle, 
-    Play, 
+import {
+    Search,
+    Plus,
+    MoreVertical,
+    Edit2,
+    Trash2,
+    Copy,
+    Clock,
+    CheckCircle2,
+    AlertCircle,
+    Play,
     Sparkles,
     Filter,
     LayoutGrid,
@@ -19,10 +19,10 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-    fetchProjectsAsync, 
-    selectAllProjects, 
-    selectProjectLoading, 
+import {
+    fetchProjectsAsync,
+    selectAllProjects,
+    selectProjectLoading,
     selectProjectPagination,
     deleteProjectAsync
 } from '../../redux/projects/projectSlice';
@@ -69,7 +69,7 @@ const ProjectListingPage = () => {
     const projects = useSelector(selectAllProjects);
     const isLoading = useSelector(selectProjectLoading);
     const pagination = useSelector(selectProjectPagination);
-    
+
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
     const [activeFilter, setActiveFilter] = useState('all');
@@ -146,11 +146,10 @@ const ProjectListingPage = () => {
                         <button
                             key={filter}
                             onClick={() => setActiveFilter(filter)}
-                            className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                                activeFilter === filter 
-                                ? 'bg-white dark:bg-gray-700 text-primary shadow-sm' 
-                                : 'text-gray-500 hover:text-charcoal dark:hover:text-white'
-                            }`}
+                            className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeFilter === filter
+                                    ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
+                                    : 'text-gray-500 hover:text-charcoal dark:hover:text-white'
+                                }`}
                         >
                             {filter}
                         </button>
@@ -159,13 +158,13 @@ const ProjectListingPage = () => {
 
                 {/* View Toggles */}
                 <div className="hidden sm:flex items-center gap-1 bg-gray-100/50 dark:bg-gray-800/50 p-1.5 rounded-2xl shrink-0">
-                    <button 
+                    <button
                         onClick={() => setViewMode('grid')}
                         className={`p-2.5 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 text-primary shadow-sm' : 'text-gray-400'}`}
                     >
                         <LayoutGrid size={18} />
                     </button>
-                    <button 
+                    <button
                         onClick={() => setViewMode('list')}
                         className={`p-2.5 rounded-xl transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-700 text-primary shadow-sm' : 'text-gray-400'}`}
                     >
@@ -187,7 +186,7 @@ const ProjectListingPage = () => {
                     </div>
                     <h3 className="text-xl font-black text-charcoal dark:text-white uppercase tracking-tight mb-2">No projects found</h3>
                     <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-8">Ready to start your next viral video?</p>
-                    <button 
+                    <button
                         onClick={() => navigate('/video-editor/create')}
                         className="text-primary font-black text-xs uppercase tracking-widest border-b-2 border-primary pb-1 hover:opacity-70"
                     >
@@ -198,23 +197,23 @@ const ProjectListingPage = () => {
                 /* GRID VIEW */
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {filteredProjects.map((/** @type {any} */ project) => (
-                        <div 
+                        <div
                             key={project.id}
                             className={`group relative flex flex-col h-full bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm p-4 rounded-[32px] border border-gray-600/80 dark:border-gray-800/80 shadow-[10px_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(var(--primary-rgb),0.1)] hover:border-primary/90 transition-all duration-500 cursor-pointer ${openMenuId === project.id ? 'z-30' : 'z-0'}`}
-                            onClick={() => navigate(`/video-editor/trim/${project.id}`)}
+                            onClick={() => navigate(`/video-editor/vad-triming/${project.id}`)}
                         >
                             {/* Card Media Preview */}
                             <div className="relative aspect-video bg-gray-100 dark:bg-gray-800 rounded-[24px] overflow-hidden mb-5 shadow-inner ring-1 ring-gray-100/50 dark:ring-gray-800/50 transition-all duration-500 group-hover:ring-primary/10">
                                 {project.thumbnail_url ? (
-                                    <img 
-                                        src={project.thumbnail_url} 
+                                    <img
+                                        src={project.thumbnail_url}
                                         alt={project.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                 ) : project.main_video_url ? (
-                                    <video 
-                                        src={project.main_video_url} 
-                                        className="w-full h-full object-cover" 
+                                    <video
+                                        src={project.main_video_url}
+                                        className="w-full h-full object-cover"
                                         muted
                                     />
                                 ) : (
@@ -222,7 +221,7 @@ const ProjectListingPage = () => {
                                         <Play size={32} className="text-gray-200 group-hover:text-primary transition-colors" />
                                     </div>
                                 )}
-                                
+
                                 {/* Overlay Badge */}
                                 <div className="absolute top-3 left-3 z-10 scale-90 origin-top-left">
                                     <StatusBadge status={project.status} />
@@ -243,29 +242,29 @@ const ProjectListingPage = () => {
                                         {project.title || 'Untitled Project'}
                                     </h4>
                                     <div className="relative shrink-0">
-                                        <button 
-                                            onClick={(e) => { 
-                                                e.stopPropagation(); 
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
                                                 setOpenMenuId(openMenuId === project.id ? null : project.id);
                                             }}
                                             className={`p-1.5 rounded-lg text-gray-400 transition-colors ${openMenuId === project.id ? 'bg-primary/10 text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                                         >
                                             <MoreVertical size={16} />
                                         </button>
-                                        
+
                                         {openMenuId === project.id && (
-                                            <div 
+                                            <div
                                                 className="absolute  right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-[1px_2px_5px_rgba(0,0,0,0.15)] border border-gray-100 dark:border-gray-800 py-2 z-40 ring-1 ring-gray-400 dark:ring-gray-800 animate-in fade-in slide-in-from-top-2 duration-200"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
-                                                <button 
-                                                    onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); navigate(`/video-editor/trim/${project.id}`); }}
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); navigate(`/video-editor/vad-triming/${project.id}`); }}
                                                     className="w-full text-left px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:bg-primary/5 hover:text-primary flex items-center gap-3 transition-colors"
                                                 >
                                                     <Edit2 size={14} /> Open Editor
                                                 </button>
                                                 <div className="h-px bg-gray-50 dark:bg-gray-800 mx-2 my-1" />
-                                                <button 
+                                                <button
                                                     onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); handleDeleteProject(project.id, project.title); }}
                                                     className="w-full text-left px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-3 transition-colors"
                                                 >
@@ -295,9 +294,9 @@ const ProjectListingPage = () => {
                 /* LIST VIEW */
                 <div className="flex flex-col gap-4">
                     {filteredProjects.map((/** @type {any} */ project) => (
-                        <div 
+                        <div
                             key={project.id}
-                            onClick={() => navigate(`/video-editor/trim/${project.id}`)}
+                            onClick={() => navigate(`/video-editor/vad-triming/${project.id}`)}
                             className={`group relative bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-[32px] border border-gray-100/80 dark:border-gray-800/80 p-5 flex items-center gap-6 transition-all hover:shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:border-primary/30 cursor-pointer ${openMenuId === project.id ? 'z-30' : 'z-0'}`}
                         >
                             <div className="w-24 h-14 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
@@ -325,29 +324,29 @@ const ProjectListingPage = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="relative">
-                                    <button 
-                                        onClick={(e) => { 
-                                            e.stopPropagation(); 
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
                                             setOpenMenuId(openMenuId === project.id ? null : project.id);
                                         }}
                                         className={`p-3 rounded-xl transition-all ${openMenuId === project.id ? 'bg-primary/10 text-primary' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                                     >
                                         <MoreVertical size={20} />
                                     </button>
-                                    
+
                                     {openMenuId === project.id && (
-                                        <div 
+                                        <div
                                             className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 py-2 z-30 animate-in fade-in slide-in-from-top-2 duration-200"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); navigate(`/video-editor/trim/${project.id}`); }}
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); navigate(`/video-editor/vad-triming/${project.id}`); }}
                                                 className="w-full text-left px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:bg-primary/5 hover:text-primary flex items-center gap-3 transition-colors"
                                             >
                                                 <Edit2 size={14} /> Open Editor
                                             </button>
                                             <div className="h-px bg-gray-50 dark:bg-gray-800 mx-2 my-1" />
-                                            <button 
+                                            <button
                                                 onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); handleDeleteProject(project.id, project.title); }}
                                                 className="w-full text-left px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-3 transition-colors"
                                             >

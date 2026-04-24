@@ -19,11 +19,11 @@ const VideoUploadPage = () => {
     const dispatch = useDispatch();
     const location = useLocation();
     const [searchParams] = useSearchParams();
-    
+
     // projectId might be in URL (if continuing) or we might have config in state (if new)
     const [projectId, setProjectId] = useState(searchParams.get('projectId'));
     const projectConfig = location.state?.projectConfig;
-    
+
     /** @type {React.MutableRefObject<HTMLInputElement | null>} */
     const fileInputRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -31,29 +31,29 @@ const VideoUploadPage = () => {
     const [isValidating, setIsValidating] = useState(false);
     const [currentUploadingIndex, setCurrentUploadingIndex] = useState(-1);
     const [uploadProgress, setUploadProgress] = useState(0);
-    
+
     /** @type {[File[], React.Dispatch<React.SetStateAction<File[]>>]} */
     const [selectedFiles, setSelectedFiles] = useState(/** @type {File[]} */([]));
-    
+
     // Status tracking for each file: 'queued', 'uploading', 'completed', 'error'
     const [fileStatuses, setFileStatuses] = useState(/** @type {Record<string, string>} */({}));
-    
+
     /** @type {[File | null, React.Dispatch<React.SetStateAction<File | null>>]} */
     const [previewFile, setPreviewFile] = useState(/** @type {File | null} */(null));
- 
+
     /** @type {[Record<string, number>, React.Dispatch<React.SetStateAction<Record<string, number>>>]} */
     const [fileDurations, setFileDurations] = useState({});
- 
+
     // Track persistent local URLs for previews to prevent memory leaks
     const [previewUrls, setPreviewUrls] = useState(/** @type {Map<string, string>} */(new Map()));
- 
+
     // Cleanup ALL object URLs when the page is closed
     React.useEffect(() => {
         return () => {
             previewUrls.forEach(url => URL.revokeObjectURL(url));
         };
     }, [previewUrls]);
- 
+
     // Safety check: ensure we have context to work with
     React.useEffect(() => {
         if (!projectId && !projectConfig) {
@@ -89,7 +89,7 @@ const VideoUploadPage = () => {
         const validTypes = ['video/mp4', 'video/quicktime', 'video/x-matroska', 'video/webm'];
         const maxSize = 4 * 1024 * 1024 * 1024; // 4GB
         const maxDuration = 15 * 60; // 15 minutes in seconds
-        
+
         setIsValidating(true);
         /** @type {File[]} */
         const newFiles = [];
@@ -138,7 +138,7 @@ const VideoUploadPage = () => {
                 newPreviewUrls.set(file.name + file.size, url);
                 // Duration is already calculated and verified at this point
             });
-            
+
             setPreviewUrls(newPreviewUrls);
             setSelectedFiles(prev => [...prev, ...newFiles]);
             toast.success("Ready", `Added ${newFiles.length} valid file(s).`);
@@ -169,7 +169,7 @@ const VideoUploadPage = () => {
         if (isUploading) return;
         const file = selectedFiles[index];
         const key = file.name + file.size;
-        
+
         // Revoke the specific URL to free memory immediately
         if (previewUrls.has(key)) {
             URL.revokeObjectURL(previewUrls.get(key) || '');
@@ -177,7 +177,7 @@ const VideoUploadPage = () => {
             newUrls.delete(key);
             setPreviewUrls(newUrls);
         }
-        
+
         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     };
 
@@ -191,7 +191,7 @@ const VideoUploadPage = () => {
 
         setIsUploading(true);
         const newStatuses = { ...fileStatuses };
-        
+
         try {
             let activeProjectId = projectId;
 
@@ -200,7 +200,7 @@ const VideoUploadPage = () => {
                 toast.info("Initializing...", "Setting up your project workspace.");
                 /** @type {any} */
                 const createResult = await dispatch(createProjectAsync(projectConfig));
-                
+
                 if (createProjectAsync.fulfilled.match(createResult)) {
                     activeProjectId = createResult.payload.id;
                     setProjectId(activeProjectId);
@@ -215,7 +215,7 @@ const VideoUploadPage = () => {
                 const file = selectedFiles[i];
                 setCurrentUploadingIndex(i);
                 setUploadProgress(10);
-                
+
                 newStatuses[file.name] = 'uploading';
                 setFileStatuses({ ...newStatuses });
 
@@ -232,8 +232,8 @@ const VideoUploadPage = () => {
 
                 // Step 2: S3 Upload
                 await uploadFileToS3(
-                    uploadUrl, 
-                    file, 
+                    uploadUrl,
+                    file,
                     file.type || 'video/mp4',
                     /** @param {number} percent */
                     (percent) => setUploadProgress(percent)
@@ -249,14 +249,14 @@ const VideoUploadPage = () => {
                 });
 
                 if (confirmResult.status !== 'success') throw new Error(confirmResult.message);
-                
+
                 newStatuses[file.name] = 'completed';
                 setFileStatuses({ ...newStatuses });
                 setUploadProgress(100);
             }
 
             toast.success("Finished!", "All files uploaded successfully.");
-            setTimeout(() => navigate(`/video-editor/trim/${activeProjectId}`), 1000);
+            setTimeout(() => navigate(`/video-editor/vad-triming/${activeProjectId}`), 1000);
 
         } catch (error) {
             const failedFile = selectedFiles[currentUploadingIndex]?.name;
@@ -277,8 +277,8 @@ const VideoUploadPage = () => {
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 className={`w-full aspect-video md:aspect-21/9 rounded-[40px] border-[3px] border-dashed transition-all cursor-pointer flex flex-col items-center justify-center p-8 relative group ${isDragging
-                        ? 'border-primary bg-primary/5 scale-[0.99]'
-                        : 'border-purple-300 dark:border-purple-900/30 hover:border-primary/50'
+                    ? 'border-primary bg-primary/5 scale-[0.99]'
+                    : 'border-purple-300 dark:border-purple-900/30 hover:border-primary/50'
                     }`}
             >
                 <input
@@ -297,7 +297,7 @@ const VideoUploadPage = () => {
                                 Upload Queue <span className="text-primary ml-2">{selectedFiles.length}</span>
                             </h3>
                             {!isUploading && (
-                                <button 
+                                <button
                                     onClick={(e) => { e.stopPropagation(); setSelectedFiles([]); }}
                                     className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline"
                                 >
@@ -308,18 +308,17 @@ const VideoUploadPage = () => {
 
                         <div className="flex-1 overflow-y-auto pr-2 custom-scroll space-y-3 px-2">
                             {selectedFiles.map((file, idx) => (
-                                <div 
+                                <div
                                     key={`${file.name}-${idx}`}
-                                    className={`group/item flex items-center gap-4 bg-white dark:bg-gray-800/50 p-4 rounded-2xl border transition-all hover:border-primary/30 ${
-                                        currentUploadingIndex === idx ? 'border-primary ring-1 ring-primary/20' : 'border-gray-100 dark:border-gray-800'
-                                    }`}
+                                    className={`group/item flex items-center gap-4 bg-white dark:bg-gray-800/50 p-4 rounded-2xl border transition-all hover:border-primary/30 ${currentUploadingIndex === idx ? 'border-primary ring-1 ring-primary/20' : 'border-gray-100 dark:border-gray-800'
+                                        }`}
                                 >
-                                    <div 
+                                    <div
                                         onClick={(e) => { e.stopPropagation(); openPreview(file); }}
                                         className="relative w-16 h-10 bg-black rounded-lg overflow-hidden cursor-zoom-in group/thumb shrink-0 border border-white/10"
                                     >
-                                        <video 
-                                            src={previewUrls.get(file.name + file.size)} 
+                                        <video
+                                            src={previewUrls.get(file.name + file.size)}
                                             className="w-full h-full object-cover opacity-80 group-hover/thumb:opacity-100 transition-opacity"
                                             muted
                                         />
@@ -350,7 +349,7 @@ const VideoUploadPage = () => {
                                         ) : currentUploadingIndex === idx ? (
                                             <Loader2 size={18} className="text-primary animate-spin" />
                                         ) : !isUploading ? (
-                                            <button 
+                                            <button
                                                 onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
                                                 className="p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
                                             >
@@ -445,12 +444,12 @@ const VideoUploadPage = () => {
 
             {/* Video Preview Modal */}
             {previewFile && (
-                <div 
+                <div
                     className="fixed inset-0 z-100 flex items-center justify-center p-8 animate-in fade-in duration-300"
                     onClick={() => setPreviewFile(null)}
                 >
                     <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" />
-                    <div 
+                    <div
                         className="relative w-full max-w-4xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-in zoom-in-95 duration-300 ring-1 ring-white/10"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -464,7 +463,7 @@ const VideoUploadPage = () => {
                                     {(previewFile.size / (1024 * 1024)).toFixed(2)} MB • Previewing Local Media
                                 </p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setPreviewFile(null)}
                                 className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center text-white transition-all backdrop-blur-md"
                             >
@@ -473,10 +472,10 @@ const VideoUploadPage = () => {
                         </div>
 
                         {/* Video Player */}
-                        <video 
-                            src={previewUrls.get(previewFile.name + previewFile.size)} 
-                            controls 
-                            autoPlay 
+                        <video
+                            src={previewUrls.get(previewFile.name + previewFile.size)}
+                            controls
+                            autoPlay
                             className="w-full h-full object-contain shadow-2xl"
                         />
                     </div>

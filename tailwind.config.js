@@ -10,6 +10,7 @@ export default {
                 primary: "#f900fc",
                 "primary-hover": "#ac00d2",
                 "primary-dark": "#6b21c4",
+                "zenxify-bg": "#f3f4f6",
                 background: "#F7F6F8",
                 "background-dark": "#191022",
                 surface: "#ffffff",
@@ -17,6 +18,7 @@ export default {
                 charcoal: "#2d3436",
                 "light-purple": "#f5f0ff",
                 "border-light": "#e9e4f0",
+                
             },
             backgroundImage: {
                 "brand-gradient": "linear-gradient(to right, #FF00FF, #a400cd)",

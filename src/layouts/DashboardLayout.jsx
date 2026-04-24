@@ -73,7 +73,7 @@ const DashboardLayout = () => {
             <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
 
             {/* Main Content Wrapper - Dynamic Margin */}
-            <div className={`flex-1 ${isCollapsed ? 'ml-20' : 'ml-64'} min-h-screen flex flex-col p-4 pt-6 transition-all duration-300 ease-in-out`}>
+            <div className={`flex-1 ${isCollapsed ? 'ml-20' : 'ml-64'} min-h-screen flex flex-col p-4 bg-zenxify-bg pt-6 transition-all duration-300 ease-in-out`}>
                 {/* Global Dashboard Header - Floating Style */}
                 <header className="flex items-center justify-between mb-8 sticky top-4 bg-white/90 dark:bg-[#0D0B14]/90 backdrop-blur-xl z-40 py-3 px-6 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-xl shadow-charcoal/5 mx-2">
                     <div className="relative w-full max-w-md group/search">
