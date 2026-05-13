@@ -602,7 +602,7 @@ const BrollCard = ({ data, isSidebarExpanded, onReplace, onAdvanced, onRegenerat
 
 
   return (
-    <div className="flex items-center gap-4 group relative w-full max-w-3xl">
+    <div className="flex items-center gap-4 group relative w-full">
       {/* Horizontal connector line */}
       <div className="absolute left-[19.5px] top-1/2 w-8 h-px bg-gray-200 -z-10" />
 
@@ -615,7 +615,7 @@ const BrollCard = ({ data, isSidebarExpanded, onReplace, onAdvanced, onRegenerat
 
       {/* Card Body */}
       <div className={cn(
-        "flex-1 w-full min-w-0 overflow-hidden bg-white rounded p-3 ring ring-gray-400 mt-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all",
+        "flex-1 w-full min-w-0 overflow-hidden bg-white rounded p-3 ring-1 ring-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all",
         !isFootage && "opacity-80"
       )}>
         <div className="flex gap-4 items-center">
@@ -1199,12 +1199,14 @@ const AdvancedRegenModal = ({
 };
 
 const TransitionRow = ({ name, onClick }) => (
-  <div className="flex flex-row items-center justify-center gap-4 my-0 py-0 w-full">
-    <div
-      onClick={onClick}
-      className="size-8 rounded bg-brand-gradient flex items-center justify-center text-white shadow-lg shadow-primary/20 transform rotate-[-5deg] hover:rotate-0 transition-all cursor-pointer group shrink-0"
-    >
-      <Infinity size={18} className="group-hover:scale-110 transition-transform" />
+  <div className="flex items-center gap-4 w-full">
+    <div className="w-10 flex justify-center shrink-0">
+      <div
+        onClick={onClick}
+        className="size-8 rounded bg-brand-gradient flex items-center justify-center text-white shadow-lg shadow-primary/20 transform rotate-[-5deg] hover:rotate-0 transition-all cursor-pointer group"
+      >
+        <Infinity size={18} className="group-hover:scale-110 transition-transform" />
+      </div>
     </div>
     <span className="text-[11px] font-black text-gray-400 tracking-[0.2em] uppercase">
       {name}
