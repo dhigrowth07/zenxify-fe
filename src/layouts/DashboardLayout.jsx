@@ -120,7 +120,7 @@ const DashboardLayout = () => {
 
                 {/* Content Area */}
                 <main className="flex-1 w-full flex flex-col">
-                    <Outlet />
+                    <Outlet context={{ isCollapsed }} />
                 </main>
             </div>
         </div>

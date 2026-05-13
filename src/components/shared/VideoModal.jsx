@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Play,
@@ -48,11 +49,9 @@ const VideoModal = ({ isOpen, onClose, videoUrl, title }) => {
     dispatch(setPreviewTime(Math.max(0, previewTime + seconds)));
   };
 
-  console.log("Metadata", videoMeta);
-
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300"
       onClick={() => onClose()}
     >
       <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl" />
@@ -167,7 +166,8 @@ const VideoModal = ({ isOpen, onClose, videoUrl, title }) => {
           Press space or click to play
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

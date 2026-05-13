@@ -3,6 +3,7 @@ import { Surface } from "gl-react-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ColorGradeLayer from "./layers/ColorGradeLayer";
 import VideoLayer from "./layers/VideoLayer";
+import BrollOverlay from "./overlays/BrollOverlay";
 import { setPreviewTime, setIsPlaying } from "../redux/editor/editorSlice";
 
 /**
@@ -23,7 +24,8 @@ export default function PreviewEngine({
   muted = false,
   resizeMode = 0, // 0: Cover, 1: Contain
   onMetadataLoaded = (/** @type {any} */ meta) => {},
-  isPlaying: controlledIsPlaying = undefined
+  isPlaying: controlledIsPlaying = undefined,
+  segments = []
 }) {
   const dispatch = useDispatch();
   /** @type {any} */
@@ -168,7 +170,12 @@ export default function PreviewEngine({
         </div>
       )}
 
-      {/* FUTURE: BrollLayer and CaptionLayer go here as overlays */}
+      {/* 
+        OVERLAYS
+      */}
+      <BrollOverlay segments={segments} />
+
+      {/* FUTURE: CaptionLayer goes here as overlays */}
     </div>
   );
 }

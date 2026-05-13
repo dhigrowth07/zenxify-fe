@@ -19,7 +19,8 @@ const VideoPreview = ({
   actionButton, 
   children,
   title = "Preview", 
-  className 
+  className,
+  segments = [] 
 }) => {
   const dispatch = useDispatch();
   const isPlaying = useSelector((state) => state.editor.isPlaying);
@@ -69,6 +70,7 @@ const VideoPreview = ({
             volume={volume}
             muted={isMuted}
             isPlaying={isPlaying && !isModalOpen}
+            segments={segments}
           />
         ) : (
           <img 

@@ -8,12 +8,13 @@ import projectReducer from "./projects/projectSlice";
 import billingReducer from "./billing/billingSlice";
 import editorReducer from "./editor/editorSlice";
 import exportReducer from "./export/exportSlice";
+import brollReducer from "./broll/brollSlice";
 
 const rootPersistConfig = {
   key: "root",
   version: 1,
   storage,
-  blacklist: ["auth", "profile", "notifications", "billing", "editor"], 
+  blacklist: ["auth", "profile", "notifications", "billing", "editor", "broll"], 
 };
 
 const authPersistConfig = {
@@ -48,6 +49,7 @@ const rootReducer = combineReducers({
   billing: billingReducer,
   editor: editorReducer,
   export: exportReducer,
+  broll: brollReducer,
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 
 const EDITOR_STEPS = [
     { name: 'Upload', route: '/video-editor/upload', noId: true },
@@ -16,7 +16,8 @@ const VideoEditorLayout = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-
+    const parentContext = useOutletContext();
+    
     const pathSegments = location.pathname.split('/');
     const currentProjectId = pathSegments.length >= 4 && pathSegments[3] ? pathSegments[3] : null;
     const handleStepClick = (step) => {
@@ -61,7 +62,7 @@ const VideoEditorLayout = () => {
 
             <main>
                 <>
-                    <Outlet />
+                    <Outlet context={parentContext} />
                 </>
             </main>
         </div>

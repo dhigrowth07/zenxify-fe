@@ -44,13 +44,25 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId, previewM
     
     // CALCULATE DYNAMIC VISUAL DURATION
     const visualTotalDuration = useMemo(() => {
-        // If we want to see gaps, we use the master duration
-        if (previewMode === 'final' || !hideCuts) {
+        // Final mode: show the actual merged duration = sum of kept segments
+        if (previewMode === 'final') {
+            let sum = 0;
+            data[0]?.actions?.forEach(action => {
+                if (action.data?.is_kept !== false) {
+                    sum += (action.end - action.start);
+                }
+            });
+            return Math.max(sum, 1);
+        }
+
+        // Editor mode with cuts visible: use absolute original timeline
+        if (!hideCuts) {
             let max = 0;
             data[0]?.actions?.forEach(a => { if (a.end > max) max = a.end; });
             return Math.max(totalDuration, max, 30);
         }
         
+        // Editor mode with cuts hidden: sum of kept segments only
         let sum = 0;
         data[0]?.actions?.forEach(action => {
             if (action.data?.is_kept !== false) {
@@ -494,20 +506,22 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId, previewM
             </div>
 
             <div className="flex-1 flex overflow-hidden">
-                {/* SIDEBAR */}
-                <div className="w-[140px] flex flex-col bg-[#111214] border-r border-[#1E1F22] z-40">
-                    <div className="h-8 border-b border-[#1E1F22]" />
-                    <div className="flex-1">
-                        {data.map(track => (
-                            <div key={track.id} className="h-15 border-b border-[#1E1F22] bg-[#111214] flex items-center justify-between px-3 group">
-                                <span className="text-[10px] font-bold text-slate-400 tracking-tight group-hover:text-[#50E3C2] transition-colors">{track.name}</span>
-                                <button className="opacity-30 group-hover:opacity-100 transition-all hover:text-orange-500">
-                                    {track.id === 'audio-track' ? <VolumeX size={12} className="text-orange-600" /> : <Volume2 size={12} />}
-                                </button>
-                            </div>
-                        ))}
+                {/* SIDEBAR — hidden in final mode (no tracks to label) */}
+                {previewMode !== 'final' && (
+                    <div className="w-[140px] flex flex-col bg-[#111214] border-r border-[#1E1F22] z-40">
+                        <div className="h-8 border-b border-[#1E1F22]" />
+                        <div className="flex-1">
+                            {data.map(track => (
+                                <div key={track.id} className="h-15 border-b border-[#1E1F22] bg-[#111214] flex items-center justify-between px-3 group">
+                                    <span className="text-[10px] font-bold text-slate-400 tracking-tight group-hover:text-[#50E3C2] transition-colors">{track.name}</span>
+                                    <button className="opacity-30 group-hover:opacity-100 transition-all hover:text-orange-500">
+                                        {track.id === 'audio-track' ? <VolumeX size={12} className="text-orange-600" /> : <Volume2 size={12} />}
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* GRID Area */}
                 <div 
@@ -515,7 +529,7 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId, previewM
                     className="flex-1 overflow-x-auto bg-[#18191B] relative pt-8 select-none custom-scroll overflow-y-hidden" 
                     onClick={handleSeek}
                 >
-                    {/* RULER WITH DYNAMIC PRECISION */}
+                    {/* RULER */}
                     <div 
                         className="absolute top-0 left-0 h-8 border-b border-black/40 bg-[#1E1F22] z-[150] cursor-pointer" 
                         style={{ width: visualTotalDuration * pixelsPerSecond }}
@@ -523,19 +537,11 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId, previewM
                     >
                         {(() => {
                             const interval = pixelsPerSecond < 40 ? 5 : pixelsPerSecond < 120 ? 1 : pixelsPerSecond < 300 ? 0.5 : 0.1;
-                            
-                            // Calculate Visual Total Duration
-                            let visualTotalDuration = 0;
-                            const keptSegments = data[0]?.actions.filter(a => a.data?.is_kept !== false).sort((a,b) => a.start - b.start) || [];
-                            keptSegments.forEach(a => { visualTotalDuration += (a.end - a.start); });
-
                             const count = Math.ceil(visualTotalDuration / interval);
                             const ticks = [];
-                            
                             for (let i = 0; i <= count; i++) {
                                 const relTime = i * interval;
                                 const isMajor = (Math.abs(relTime % (interval * 5)) < 0.001) || relTime === 0;
-                                
                                 ticks.push(
                                     <div key={relTime} className="absolute bottom-0 flex flex-col items-center" style={{ left: relTime * pixelsPerSecond }}>
                                         {isMajor && (
@@ -554,10 +560,24 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId, previewM
                     {/* PLAYHEAD */}
                     <Playhead containerRef={timelineContainerRef} pixelsPerSecond={pixelsPerSecond} isPlaying={isPlaying} getVisualTime={getVisualTime} />
 
-                    {/* TRACKS GRID */}
-                    <div className="relative min-w-max" style={{ width: visualTotalDuration * pixelsPerSecond }}>
-                        {data.map((track, tIdx) => {
-                            return (
+                    {/* ── FINAL MODE: Single unified "Final Cut" bar ──────────────────── */}
+                    {previewMode === 'final' ? (
+                        <div className="relative min-w-max flex items-center" style={{ width: visualTotalDuration * pixelsPerSecond, height: 60 }}>
+                            {/* Solid teal bar spanning the full merged duration */}
+                            <div
+                                className="absolute top-[7.5%] h-[85%] rounded-md bg-[#50E3C2]/20 border border-[#50E3C2]/50 flex items-center px-3 gap-2 overflow-hidden"
+                                style={{ left: 0, width: visualTotalDuration * pixelsPerSecond }}
+                            >
+                                <Play size={11} fill="#50E3C2" className="text-[#50E3C2] shrink-0" />
+                                <span className="text-[10px] font-black text-[#50E3C2] tracking-widest uppercase truncate">
+                                    Final Cut — {formatTimecode(visualTotalDuration)}
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        /* ── EDITOR MODE: Full multi-track segment grid ─────────────── */
+                        <div className="relative min-w-max" style={{ width: visualTotalDuration * pixelsPerSecond }}>
+                            {data.map((track) => (
                                 <div key={track.id} className="h-15 border-b border-black/30 relative flex items-center">
                                     {track.actions?.map((action, idx) => {
                                         const isKept = action.data?.is_kept !== false;
@@ -566,14 +586,14 @@ const TimelineEditor = ({ data: externalData, projectId: propProjectId, previewM
                                             <SegmentBlock key={action.id} action={action} pps={pixelsPerSecond} index={idx + 1}
                                                 isSelected={selectedActionId === action.id} onSelect={() => setSelectedActionId(action.id)}
                                                 onTrimStart={startTrim} onToggle={toggleSegment} onSeek={(t) => dispatch(setPreviewTime(t))}
-                                                getVisualTime={getVisualTime} hideCuts={hideCuts} 
+                                                getVisualTime={getVisualTime} hideCuts={hideCuts}
                                                 previewMode={previewMode} />
                                         );
                                     })}
                                 </div>
-                            );
-                        })}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -682,36 +702,40 @@ const Playhead = ({ pixelsPerSecond, isPlaying, containerRef, getVisualTime }) =
 const TimeIndicator = ({ data, hideCuts, totalDuration, previewMode }) => {
     const previewTime = useSelector((state) => state.editor.previewTime);
     
-    // Calculate accurate visual total duration (sum of kept segments)
+    /**
+     * In 'final' mode: total = sum of kept segments (= actual merged video duration).
+     * In 'editor' mode with cuts hidden: same sum-of-kept calculation.
+     * In 'editor' mode with cuts visible: use the original source duration.
+     */
     const visualTotalDuration = useMemo(() => {
-        if (previewMode === 'final' || !hideCuts) return totalDuration;
-
-        const masterSegments = data[0]?.actions || [];
-        const kept = masterSegments.filter(a => a.data?.is_kept !== false);
-        
-        if (!hideCuts) return totalDuration;
-        
-        let sum = 0;
-        kept.forEach(action => {
-            sum += (action.end - action.start);
-        });
-        
-        return sum;
+        if (previewMode === 'final' || hideCuts) {
+            const masterSegments = data[0]?.actions || [];
+            let sum = 0;
+            masterSegments.forEach(action => {
+                if (action.data?.is_kept !== false) {
+                    sum += (action.end - action.start);
+                }
+            });
+            return Math.max(sum, 1);
+        }
+        // Editor mode, cuts visible — show original source duration
+        return totalDuration;
     }, [data, hideCuts, totalDuration, previewMode]);
 
-    // Calculate accurate visual current time
+    /**
+     * Current playhead position expressed as visual time:
+     * - 'final' mode: previewTime IS the position within the merged video.
+     * - 'editor' mode cuts hidden: map raw time → compact visual time.
+     * - 'editor' mode cuts visible: raw time = visual time.
+     */
     const visualCurrentTime = useMemo(() => {
-        // In final mode, the timeline is absolute. The playhead represents the visual time.
-        // But for the "Indicator" text, maybe we should show the visual time of the video?
-        // User wants the indicator to be proper - usually means the time of the file playing.
-        if (previewMode === 'final') return previewTime; 
+        if (previewMode === 'final') return previewTime;
         if (!hideCuts) return previewTime;
         
         let visualTime = 0;
         const masterSegments = data[0]?.actions || [];
         for (const action of masterSegments) {
             const isKept = action.data?.is_kept !== false;
-            
             if (previewTime >= action.end) {
                 if (isKept) visualTime += (action.end - action.start);
             } else if (previewTime >= action.start && previewTime < action.end) {
