@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useOutletContext } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -40,7 +40,9 @@ import {
   applyBrollToEditor
 } from '../../redux/broll/brollSlice';
 import {
-  loadProject
+  loadProject,
+  setPreviewTime,
+  setIsPlaying
 } from '../../redux/editor/editorSlice';
 import ConfirmationModal from '../../components/shared/ConfirmationModal';
 
@@ -52,7 +54,54 @@ const BrollPage = () => {
 
   const { results, status, analysisStatus, error } = useSelector((state) => state.broll);
   const editorProject = useSelector((state) => state.editor);
+  const isPlaying = editorProject?.isPlaying;
   const projectStatus = editorProject?.editor?.projectJson?.status;
+  const previewTime = editorProject?.previewTime || 0;
+  const containerRef = useRef(null);
+
+  // Track active segment for highlighting and auto-scrolling
+  const activeSegmentIndex = useMemo(() => {
+    if (!results || results.length === 0) return -1;
+    let cumulativeTime = 0;
+    for (let i = 0; i < results.length; i++) {
+      const duration = parseFloat(results[i].duration) || 0;
+      if (previewTime >= cumulativeTime && previewTime < cumulativeTime + duration) {
+        return i;
+      }
+      cumulativeTime += duration;
+    }
+    // Handle the very end of the video
+    const totalDuration = results.reduce((acc, curr) => acc + (parseFloat(curr.duration) || 0), 0);
+    if (previewTime >= totalDuration && results.length > 0) return results.length - 1;
+    
+    return -1;
+  }, [results, previewTime]);
+
+  // Handle container-only auto-scrolling
+  useEffect(() => {
+    if (activeSegmentIndex !== -1 && containerRef.current) {
+      const activeEl = containerRef.current.querySelector(`#broll-segment-${activeSegmentIndex}`);
+      if (activeEl) {
+        const container = containerRef.current;
+        const scrollOffset = activeEl.offsetTop - (container.clientHeight / 2) + (activeEl.clientHeight / 2);
+        
+        container.scrollTo({
+          top: scrollOffset,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [activeSegmentIndex]);
+
+  const handleSelectSegment = (index) => {
+    if (!results || results.length === 0) return;
+    let startTime = 0;
+    for (let i = 0; i < index; i++) {
+      startTime += parseFloat(results[i].duration) || 0;
+    }
+    dispatch(setPreviewTime(startTime));
+    dispatch(setIsPlaying(true));
+  };
 
   // ─── Hydrate editor state on page refresh ──────────────────────────────────
   // BrollPage may be navigated to directly (or refreshed), at which point the
@@ -406,7 +455,7 @@ const BrollPage = () => {
         <div className="min-w-0 relative">
           <h1 className="text-3xl font-black text-charcoal mb-10 ml-2">B-Roll</h1>
 
-          <div className="h-[calc(100vh-120px)] overflow-y-auto overflow-x-hidden pr-4 custom-scrollbar relative">
+          <div ref={containerRef} className="h-[calc(100vh-120px)] overflow-y-auto overflow-x-hidden pr-4 custom-scrollbar relative">
             {/* Vertical timeline line */}
             <div className="absolute left-[19.5px] top-4 bottom-0 w-px bg-gray-300 z-0" />
 
@@ -437,6 +486,9 @@ const BrollPage = () => {
                     key={item.id}
                     data={item}
                     isSidebarExpanded={!isCollapsed}
+                    isActive={activeSegmentIndex === item.segment_index}
+                    isPlaying={isPlaying}
+                    onSelect={handleSelectSegment}
                     onReplace={() => handleOpenReplace(item)}
                     onAdvanced={() => handleOpenAdvanced(item)}
                     onRegenerate={handleDirectRegenerate}
@@ -542,7 +594,7 @@ const BrollPage = () => {
   );
 };
 
-const BrollCard = ({ data, isSidebarExpanded, onReplace, onAdvanced, onRegenerate, isRegenerating, onEffects, onQuickSwap }) => {
+const BrollCard = ({ data, isSidebarExpanded, onReplace, onAdvanced, onRegenerate, isRegenerating, onEffects, onQuickSwap, isActive, isPlaying, onSelect }) => {
   const isFootage = data.is_footage === true;
   const [showCandidates, setShowCandidates] = useState(false);
   const [previewClip, setPreviewClip] = useState(null);
@@ -602,22 +654,42 @@ const BrollCard = ({ data, isSidebarExpanded, onReplace, onAdvanced, onRegenerat
 
 
   return (
-    <div className="flex items-center gap-4 group relative w-full">
+    <div id={`broll-segment-${data.segment_index}`} className={cn(
+      "flex items-center gap-4 group relative w-full transition-all duration-500",
+      isActive && "z-20"
+    )}>
       {/* Horizontal connector line */}
-      <div className="absolute left-[19.5px] top-1/2 w-8 h-px bg-gray-200 -z-10" />
+      <div className={cn(
+        "absolute left-[19.5px] top-1/2 w-8 h-px -z-10 transition-colors",
+        isActive ? "bg-indigo-400" : "bg-gray-200"
+      )} />
 
       {/* Index Number Wrapper */}
       <div className="w-10 flex justify-center shrink-0">
-        <div className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-[10px] font-black text-gray-400 shadow-sm relative z-10">
+        <div className={cn(
+          "w-8 h-8 rounded-full border flex items-center justify-center text-[10px] font-black shadow-sm relative z-10 transition-all duration-300",
+          isActive 
+            ? "bg-indigo-600 border-indigo-500 text-white scale-110 shadow-indigo-200" 
+            : "bg-white border-gray-100 text-gray-400"
+        )}>
           {data.segment_index + 1}
+          {isActive && isPlaying && (
+            <span className="absolute inset-0 rounded-full bg-indigo-400 animate-ping opacity-20" />
+          )}
         </div>
       </div>
 
       {/* Card Body */}
-      <div className={cn(
-        "flex-1 w-full min-w-0 overflow-hidden bg-white rounded p-3 ring-1 ring-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all",
-        !isFootage && "opacity-80"
-      )}>
+      <div 
+        onClick={() => onSelect && onSelect(data.segment_index)}
+        className={cn(
+          "flex-1 w-full min-w-0 overflow-hidden bg-white rounded p-3 ring-1 transition-all duration-300 cursor-pointer",
+          isActive 
+            ? "ring-indigo-500 shadow-[0_8px_30px_rgba(79,70,229,0.12)] border-indigo-100 bg-indigo-50/5" 
+            : "ring-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-gray-100/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]",
+          !isFootage && "opacity-80"
+        )}
+      >
         <div className="flex gap-4 items-center">
           {/* Thumbnail */}
           <div className={cn(

@@ -41,6 +41,14 @@ export default function PreviewEngine({
   const videoRef = useRef();
   const [size, setSize] = React.useState({ width: 360, height: 640 });
 
+  // Helper: compact snapshot of video element state for logs
+  const snap = () => {
+    const v = videoRef.current;
+    if (!v) return '(no video)';
+    const bufferedEnd = v.buffered.length > 0 ? v.buffered.end(v.buffered.length - 1).toFixed(2) : 'none';
+    return `t=${v.currentTime.toFixed(3)} paused=${v.paused} readyState=${v.readyState} networkState=${v.networkState} bufferedEnd=${bufferedEnd}`;
+  };
+
   // Dynamically track container size for the GPU Surface
   React.useEffect(() => {
     if (!containerRef.current) return;
@@ -56,6 +64,7 @@ export default function PreviewEngine({
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
+
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.volume = volume;
@@ -66,14 +75,18 @@ export default function PreviewEngine({
   // Sync Global Play/Pause state to the underlying video element
   useEffect(() => {
     if (!videoRef.current) return;
+    console.log(`[PE:isPlaying] effect fired — isPlaying=${isPlaying} | ${snap()}`);
     if (isPlaying) {
-      // Only attempt to play if video is ready to avoid AbortError conflicts
       if (videoRef.current.readyState >= 2) {
+        console.log('[PE:isPlaying] calling play()...');
         videoRef.current.play().catch(e => {
-          if (e.name !== 'AbortError') console.warn("Autoplay blocked", e);
+          console.error(`[PE:isPlaying] play() REJECTED — name=${e.name} msg=${e.message} | ${snap()}`);
         });
+      } else {
+        console.warn(`[PE:isPlaying] NOT ready for play — readyState=${videoRef.current.readyState} | ${snap()}`);
       }
     } else {
+      console.log('[PE:isPlaying] calling pause() | ${snap()}');
       videoRef.current.pause();
     }
   }, [isPlaying]);
@@ -82,7 +95,9 @@ export default function PreviewEngine({
   useEffect(() => {
     if (!videoRef.current) return;
     const diff = Math.abs(videoRef.current.currentTime - previewTime);
-    if (diff > 0.5) { // Only force seek if the difference is significant
+    console.log(`[PE:seek] effect — redux=${previewTime.toFixed(3)} | ${snap()} | diff=${diff.toFixed(3)} willSeek=${diff > 0.5}`);
+    if (diff > 0.5) {
+      console.log(`[PE:seek] SEEKING to ${previewTime.toFixed(3)}`);
       videoRef.current.currentTime = previewTime;
     }
   }, [previewTime]);
@@ -90,9 +105,29 @@ export default function PreviewEngine({
   // Ensure the browser reloads the video when the source URL changes
   useEffect(() => {
     if (sourceUrl && videoRef.current) {
+      console.log(`[PE:sourceUrl] source changed — calling load(). url=${sourceUrl}`);
       videoRef.current.load();
     }
   }, [sourceUrl]);
+
+  // ── Heartbeat watchdog ─────────────────────────────────────────────────────
+  // Fires every 2s while isPlaying=true to detect silent stalls
+  useEffect(() => {
+    if (!isPlaying) return;
+    let lastTime = videoRef.current?.currentTime ?? 0;
+    const id = setInterval(() => {
+      const v = videoRef.current;
+      if (!v) return;
+      const advanced = v.currentTime - lastTime;
+      if (advanced < 0.05) {
+        console.warn(`[PE:watchdog] STUCK — time did not advance! advanced=${advanced.toFixed(4)} | ${snap()} | redux_isPlaying=${isPlaying}`);
+      } else {
+        console.log(`[PE:watchdog] OK — advanced ${advanced.toFixed(3)}s in last 2s | ${snap()}`);
+      }
+      lastTime = v.currentTime;
+    }, 2000);
+    return () => clearInterval(id);
+  }, [isPlaying]);
 
   return (
     <div 
@@ -114,9 +149,9 @@ export default function PreviewEngine({
           /** @type {any} */
           const target = e.target;
           const { videoWidth, videoHeight } = target;
+          console.log(`[PE:loadedmetadata] ${videoWidth}x${videoHeight} | ${snap()}`);
           if (videoWidth && videoHeight) {
             const aspect = videoWidth / videoHeight;
-            // Prevent spamming the parent with the same data
             if (Math.abs(aspect - (editorState?.color?.hsl?.lastAspect || 0)) > 0.01) {
               onMetadataLoaded?.({ width: videoWidth, height: videoHeight, aspect });
             }
@@ -130,13 +165,39 @@ export default function PreviewEngine({
         onError={(e) => {
           /** @type {any} */
           const video = videoRef.current;
-          console.error("GPU Video Source Error:", video?.error);
-          console.error("Attempted URL:", sourceUrl);
+          console.error("[PE:error] Video error:", video?.error, "url:", sourceUrl);
         }}
         onCanPlay={() => {
-          if (isPlaying && videoRef.current) {
-            videoRef.current.play().catch((/** @type {any} */ e) => console.warn("Autoplay blocked:", e));
+          console.log(`[PE:canPlay] fired | ${snap()}`);
+          // Only call play() if currently paused — canPlay fires on every buffer refill
+          if (isPlaying && videoRef.current && videoRef.current.paused) {
+            console.log('[PE:canPlay] video is paused but should play — calling play()');
+            videoRef.current.play().catch((/** @type {any} */ e) => console.warn("[PE:canPlay] play() blocked:", e));
           }
+        }}
+        onPlaying={() => {
+          console.log(`[PE:playing] video started/resumed | ${snap()}`);
+        }}
+        onPause={() => {
+          console.log(`[PE:pause] video PAUSED | ${snap()} | redux_isPlaying=${isPlaying}`);
+        }}more
+        onSeeking={() => {
+          console.log(`[PE:seeking] seek started | ${snap()}`);
+        }}
+        onSeeked={() => {
+          console.log(`[PE:seeked] seek complete | ${snap()} | redux_isPlaying=${isPlaying}`);
+        }}
+        onWaiting={() => {
+          console.warn(`[PE:waiting] BUFFERING/WAITING | ${snap()}`);
+        }}
+        onStalled={() => {
+          console.warn(`[PE:stalled] STALLED — browser stopped fetching data | ${snap()}`);
+        }}
+        onSuspend={() => {
+          console.warn(`[PE:suspend] SUSPENDED — browser suspended loading | ${snap()}`);
+        }}
+        onEnded={() => {
+          console.log(`[PE:ended] video ended | ${snap()}`);
         }}
       >
         {sourceUrl && <source src={sourceUrl} type="video/mp4" />}
